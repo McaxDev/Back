@@ -1,0 +1,37 @@
+package handler
+
+import (
+	"context"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/mcstatus-io/mcutil/v3"
+	"github.com/mcstatus-io/mcutil/v3/response"
+)
+
+func Status(c *gin.Context) {
+	ctx, canc := context.WithTimeout(context.Background(), time.Second*5)
+	defer canc()
+
+	srv := c.Query("srv")
+
+	var resp *response.FullQuery
+	var err error
+
+	switch srv {
+	case "sc":
+		resp, err = mcutil.FullQuery(ctx, "sc.mcax.cn", 25565)
+	case "mod":
+		resp, err = mcutil.FullQuery(ctx, "mod.mcax.cn", 25565)
+	default:
+		resp, err = mcutil.FullQuery(ctx, "mcax.cn", 25565)
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "查询失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
