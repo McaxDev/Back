@@ -22,20 +22,20 @@ import (
 func Prompt(c *gin.Context) {
 	resp, err := http.Get("http://127.0.0.1:1314/status")
 	if err != nil {
-		c.JSON(500, util.Json("失败", "调用在线人数API失败"))
+		c.JSON(500, util.Json("调用在线人数API失败", nil))
 		return
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		c.JSON(500, util.Json("失败", "转换请求体失败"))
+		c.JSON(500, util.Json("转换请求体失败", nil))
 		return
 	}
 
 	var ol_data map[string]interface{}
 	if err := json.Unmarshal(body, &ol_data); err != nil {
-		c.JSON(500, util.Json("失败", "读取请求体失败"))
+		c.JSON(500, util.Json("读取请求体失败", nil))
 		return
 	}
 
@@ -48,14 +48,14 @@ func Prompt(c *gin.Context) {
 
 	bgfile, err := os.Open("onlineBG.png")
 	if err != nil {
-		c.JSON(500, util.Json("失败", "服务器没有图片"))
+		c.JSON(500, util.Json("服务器没有图片", nil))
 		return
 	}
 	defer bgfile.Close()
 
 	img, err := png.Decode(bgfile)
 	if err != nil {
-		c.JSON(500, util.Json("失败", "读取图片失败"))
+		c.JSON(500, util.Json("读取图片失败", nil))
 		return
 	}
 
@@ -64,12 +64,12 @@ func Prompt(c *gin.Context) {
 	draw.Draw(newImg, bounds, img, bounds.Min, draw.Src)
 	fontBytes, err := os.ReadFile(config.Config.McFont)
 	if err != nil {
-		c.JSON(500, util.Json("失败", "未找到字体"))
+		c.JSON(500, util.Json("未找到字体", nil))
 		return
 	}
 	f, err := opentype.Parse(fontBytes)
 	if err != nil {
-		c.JSON(500, util.Json("失败", "字体文件有误"))
+		c.JSON(500, util.Json("字体文件有误", nil))
 		return
 	}
 	face, err := opentype.NewFace(f, &opentype.FaceOptions{
@@ -78,7 +78,7 @@ func Prompt(c *gin.Context) {
 		Hinting: font.HintingNone,
 	})
 	if err != nil {
-		c.JSON(500, util.Json("失败", "字体设置失败"))
+		c.JSON(500, util.Json("字体设置失败", nil))
 		return
 	}
 
@@ -97,6 +97,6 @@ func Prompt(c *gin.Context) {
 
 	c.Writer.Header().Set("Content-type", "image/png")
 	if err := png.Encode(c.Writer, newImg); err != nil {
-		c.JSON(500, util.Json("失败", "图片发送失败"))
+		c.JSON(500, util.Json("图片发送失败", nil))
 	}
 }

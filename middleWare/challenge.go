@@ -32,3 +32,12 @@ func Challenge(realPwd string) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func ClearExpiredChallenge() {
+	now := time.Now()
+	for challenge, expiry := range chals {
+		if now.After(expiry) {
+			delete(chals, challenge)
+		}
+	}
+}

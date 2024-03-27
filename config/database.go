@@ -1,27 +1,25 @@
 package config
 
 import (
-	"database/sql"
-	"errors"
-	"time"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-var DB *sql.DB
+var DB *gorm.DB
+
+type User struct {
+	gorm.Model
+	UserName string
+	UserPas  string
+	Admin    int
+	GameName string
+	Head     string
+}
 
 func ReadDB() error {
-	sqlinfo, ok := Conf["sql"].(string)
-	if !ok {
-		return errors.New("Assertion failed")
-	}
-	if dbtmp, err := sql.Open("mysql", sqlinfo); err != nil {
-		return err
-	} else {
-		DB = dbtmp
-	}
-	DB.SetMaxOpenConns(25)
-	DB.SetMaxIdleConns(10)
-	DB.SetConnMaxLifetime(5 * time.Minute)
-	if err := DB.Ping(); err != nil {
+	var err error
+	DB, err = gorm.Open(mysql.Open(Config.Sql), &gorm.Config{})
+	if err != nil {
 		return err
 	}
 	return nil

@@ -12,6 +12,7 @@ var Config = struct {
 	JwtKey   []byte
 	AllowCmd []string
 	McFont   string
+	Sql      string
 }{}
 
 var Info = struct {

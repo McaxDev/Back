@@ -7,6 +7,7 @@ import (
 
 	cmd "github.com/McaxDev/Back/command"
 	conf "github.com/McaxDev/Back/config"
+	mid "github.com/McaxDev/Back/middleWare"
 	"github.com/McaxDev/Back/routine"
 	"github.com/spf13/cobra"
 )
@@ -30,9 +31,9 @@ func main() {
 	}
 
 	go routine.Backend()
+	go routine.Schedule(10, mid.ClearExpiredChallenge)
 
 	rootCmd := &cobra.Command{Use: "axoback"}
-	rootCmd.AddCommand(cmd.Help)
 	rootCmd.AddCommand(cmd.Reload)
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalln(err)
