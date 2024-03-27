@@ -19,7 +19,7 @@ func GetChallenge(c *gin.Context) {
 	chalIte++
 }
 
-func AuthChallenge(realPwd string) gin.HandlerFunc {
+func Challenge(realPwd string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userChal, userHash := c.PostForm("challenge"), c.PostForm("password")
 		if time.Now().Before(chals[userChal]) {

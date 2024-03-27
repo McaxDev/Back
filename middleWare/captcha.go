@@ -17,7 +17,7 @@ func GetCaptcha(c *gin.Context) {
 	c.Header("X-Captcha-Id", id)
 }
 
-func AuthCaptcha(c *gin.Context) {
+func Captcha(c *gin.Context) {
 	id, userInput := c.PostForm("captchaID"), c.PostForm("captchaValue")
 	if !captcha.VerifyString(id, userInput) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "验证码不正确"})

@@ -24,7 +24,7 @@ func GetJwt(id int, name string, admin bool) (string, error) {
 	return tokenString, nil
 }
 
-func AuthJwt(c *gin.Context) {
+func Jwt(c *gin.Context) {
 	Authorization := c.GetHeader("Authorization")
 	if !strings.HasPrefix(Authorization, "Bearer ") {
 		c.AbortWithStatusJSON(400, gin.H{"error": "token不合法！"})

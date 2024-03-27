@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 	"github.com/mcstatus-io/mcutil/v3"
 	"github.com/mcstatus-io/mcutil/v3/response"
@@ -29,7 +30,7 @@ func Status(c *gin.Context) {
 	}
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "查询失败"})
+		c.JSON(500, util.Json("查询失败", nil))
 		return
 	}
 

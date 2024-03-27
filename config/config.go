@@ -6,22 +6,23 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type config struct {
+var Config = struct {
 	RconPwd  string
 	GptToken string
 	JwtKey   []byte
-}
+	AllowCmd []string
+	McFont   string
+}{}
 
-var Config = config{
-	RconPwd:  "",
-	GptToken: "",
-	JwtKey:   nil,
-}
+var Info = struct {
+	MainVer string
+	ScVer   string
+	ModVer  string
+}{}
 
-func ReadConf() error {
-	path := "config.yaml"
+func Read(config interface{}, path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		data, err := yaml.Marshal(&Config)
+		data, err := yaml.Marshal(config)
 		if err != nil {
 			return err
 		}
@@ -34,7 +35,7 @@ func ReadConf() error {
 		if err != nil {
 			return err
 		}
-		if err := yaml.Unmarshal(data, &Config); err != nil {
+		if err := yaml.Unmarshal(data, config); err != nil {
 			return err
 		}
 		return nil

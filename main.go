@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	cmd "github.com/McaxDev/Back/command"
 	conf "github.com/McaxDev/Back/config"
-	hdlr "github.com/McaxDev/Back/handler"
-	mid "github.com/McaxDev/Back/middleWare"
-	"github.com/gin-gonic/gin"
+	"github.com/McaxDev/Back/routine"
+	"github.com/spf13/cobra"
 )
 
 func main() {
@@ -19,18 +19,22 @@ func main() {
 	if err := os.Chdir(filepath.Dir(exePath)); err != nil {
 		log.Fatal("更改程序基准目录失败：", err)
 	}
-	if err := conf.ReadConf(); err != nil {
+	if err := conf.Read(conf.Config, "config.yaml"); err != nil {
 		log.Fatal("配置文件读取失败：", err)
+	}
+	if err := conf.Read(conf.Info, "info.json"); err != nil {
+		log.Fatal("信息读取失败：", err)
 	}
 	if err := conf.ReadDB(); err != nil {
 		log.Fatal("读取数据库失败：", err)
 	}
-	r := gin.Default()
-	r.GET("/captcha", mid.GetCaptcha)
-	r.GET("/challenge", mid.GetChallenge)
-	r.GET("/status", hdlr.Status)
-	r.GET("/prompt", hdlr.Prompt)
-	r.POST("/rcon", mid.AuthCaptcha, mid.AuthChallenge(conf.Config.RconPwd), hdlr.Listenrcon)
-	r.POST("/gpt", mid.AuthCaptcha, hdlr.Gpt)
-	r.Run(":8080")
+
+	go routine.Backend()
+
+	rootCmd := &cobra.Command{Use: "axoback"}
+	rootCmd.AddCommand(cmd.Help)
+	rootCmd.AddCommand(cmd.Reload)
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatalln(err)
+	}
 }
