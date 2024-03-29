@@ -15,17 +15,17 @@ func Register(c *gin.Context) {
 		return
 	}
 	if err := passwordvalidator.Validate(newUser.UserPas, 60.0); err != nil {
-		util.Error(c, 400, "注册失败，密码复杂度不够", err)
+		util.Warn(c, 400, "注册失败，密码复杂度不够", err)
 		return
 	}
 	var tmp entity.User
 	result := config.DB.Where("user_name = ?", newUser.UserName).First(&tmp)
-	if result.Error == nil {
-		util.Error(c, 409, "该用户已存在", nil)
+	if err := result.Error; err == nil {
+		util.Warn(c, 409, "该用户已存在", err)
 		return
 	}
-	if config.DB.Create(&newUser) != nil {
-		util.Error(c, 500, "无法创建用户", nil)
+	if err := config.DB.Create(&newUser).Error; err != nil {
+		util.Error(c, 500, "无法创建用户", err)
 		return
 	}
 	util.Error(c, 200, "用户创建成功", nil)
