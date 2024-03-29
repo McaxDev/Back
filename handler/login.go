@@ -11,22 +11,28 @@ import (
 )
 
 func Login(c *gin.Context) {
-	var user, tmp entity.User
-	if err := c.ShouldBind(&user); err != nil {
-		util.Warn(c, 400, "请求表单数据有误", err)
-		return
-	}
-	result := config.DB.Where("username = ?", user.UserName).First(&tmp)
-	if err := result.Error; err != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	challenge := c.PostForm("challenge")
+	hash := c.PostForm("hash")
+	username := c.PostForm("username")
+	var tmp entity.User
+	err := config.DB.Where("username = ?", username).First(&tmp).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			util.Warn(c, 401, "该用户不存在", err)
 		} else {
 			util.Error(c, 500, "服务器错误", err)
 		}
 		return
 	}
-	if user.UserPas != tmp.UserPas {
+	if !AuthChallenge(challenge, hash, tmp.Password) {
 		util.Warn(c, 401, "密码不正确", nil)
 		return
 	}
+	token, err := GetJwt(int(tmp.ID), tmp.Username, tmp.Admin)
+	if err != nil {
+		util.Error(c, 500, "JWT生成失败", err)
+		return
+	}
+	tokenMap := map[string]interface{}{"token": token}
+	util.Info(c, 200, "JWT生成成功", tokenMap)
 }

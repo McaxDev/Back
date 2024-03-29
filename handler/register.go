@@ -9,22 +9,18 @@ import (
 )
 
 func Register(c *gin.Context) {
-	var newUser entity.User
-	if err := c.BindJSON(&newUser); err != nil {
-		util.Error(c, 400, "将表单数据绑定到结构体失败", err)
-		return
-	}
-	if err := passwordvalidator.Validate(newUser.UserPas, 60.0); err != nil {
+	username, password := c.PostForm("username"), c.PostForm("password")
+	if err := passwordvalidator.Validate(password, 60.0); err != nil {
 		util.Warn(c, 400, "注册失败，密码复杂度不够", err)
 		return
 	}
-	var tmp entity.User
-	result := config.DB.Where("user_name = ?", newUser.UserName).First(&tmp)
+	result := config.DB.Where("user_name = ?", username).First(&entity.User{})
 	if err := result.Error; err == nil {
 		util.Warn(c, 409, "该用户已存在", err)
 		return
 	}
-	if err := config.DB.Create(&newUser).Error; err != nil {
+	user := entity.User{Username: username, Password: password}
+	if err := config.DB.Create(&user).Error; err != nil {
 		util.Error(c, 500, "无法创建用户", err)
 		return
 	}

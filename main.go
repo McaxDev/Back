@@ -18,6 +18,8 @@ func main() {
 
 	conf.DB.AutoMigrate(&entity.Log{})
 	conf.DB.AutoMigrate(&entity.User{})
+	conf.DB.AutoMigrate(&entity.Text{})
+
 	exePath, err := os.Executable()
 	if err != nil {
 		util.Fatal("读取程序所在路径失败：", err)

@@ -10,10 +10,6 @@ import (
 func Rcon(c *gin.Context) {
 
 	//读取用户POST请求的表单数据
-	if err := c.Request.ParseForm(); err != nil {
-		util.Error(c, 500, "解析表单数据失败", err)
-		return
-	}
 	srv, cmd := c.PostForm("server"), c.PostForm("command")
 	challenge, hash := c.PostForm("challenge"), c.PostForm("password")
 
