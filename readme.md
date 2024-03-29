@@ -1,4 +1,4 @@
-#Axolotland API
+# Axolotland API
 ## 用法
 ### GET /captcha
 #### 成功时
