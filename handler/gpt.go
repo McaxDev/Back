@@ -15,7 +15,7 @@ func Gpt(c *gin.Context) {
 	// 获取查询字符串参数
 	text := c.Query("text")
 	if text == "" {
-		c.JSON(400, util.Json("缺乏查询字符串参数", nil))
+		util.Error(c, 400, "缺乏查询字符串参数", err)
 		return
 	}
 	model := "gpt-3.5-turbo"
@@ -26,7 +26,7 @@ func Gpt(c *gin.Context) {
 	if inputed := c.Query("temperature"); inputed != "" {
 		temp, err := strconv.ParseFloat(inputed, 64)
 		if err != nil {
-			c.JSON(400, util.Json("不合法的temperature值", nil))
+			util.Error(c, 400, "不合法的temperature值", err)
 			return
 		}
 		temperature = temp
@@ -39,14 +39,14 @@ func Gpt(c *gin.Context) {
 		"temperature": temperature,
 	})
 	if err != nil {
-		c.JSON(500, util.Json("请求失败", nil))
+		util.Error(c, 500, "请求失败", err)
 		return
 	}
 	gptUrl := "https://api.openai.com/v1/chat/completions"
 	gptRequest := strings.NewReader(string(requestBody))
 	req, err := http.NewRequest("POST", gptUrl, gptRequest)
 	if err != nil {
-		c.JSON(500, util.Json("请求发送失败", nil))
+		util.Error(c, 500, "请求发送失败", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -55,13 +55,13 @@ func Gpt(c *gin.Context) {
 	// 向GPT发送请求之后向用户发送请求
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
-		c.JSON(500, util.Json(err.Error(), nil))
+		util.Error(c, 500, err.Error(), err)
 		return
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		c.JSON(500, util.Json(err.Error(), nil))
+		util.Error(c, 500, err.Error(), err)
 		return
 	}
 	c.Data(http.StatusOK, "application/json", body)

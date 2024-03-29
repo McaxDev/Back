@@ -3,9 +3,9 @@ package middleWare
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/McaxDev/Back/config"
+	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -15,7 +15,6 @@ func GetJwt(id int, name string, admin bool) (string, error) {
 		"id":    id,
 		"name":  name,
 		"admin": admin,
-		"exp":   time.Now().Add(time.Hour).Unix(),
 	})
 	tokenString, err := token.SignedString(config.Config.JwtKey)
 	if err != nil {
@@ -27,20 +26,21 @@ func GetJwt(id int, name string, admin bool) (string, error) {
 func Jwt(c *gin.Context) {
 	Authorization := c.GetHeader("Authorization")
 	if !strings.HasPrefix(Authorization, "Bearer ") {
-		c.AbortWithStatusJSON(400, gin.H{"error": "token不合法！"})
+		c.AbortWithStatusJSON(400, util.Json("token不合法！", nil))
 		return
 	}
 	RawJwtToken := Authorization[len("Bearer "):]
 	JwtToken, err := jwt.Parse(RawJwtToken, keyFunc)
 	if err != nil {
-		c.AbortWithStatusJSON(401, gin.H{"error": "token不正确"})
+		c.AbortWithStatusJSON(401, util.Json("token格式不正确！", nil))
 		return
 	}
 	if claims, ok := JwtToken.Claims.(jwt.MapClaims); ok && JwtToken.Valid {
 		c.Set("userInfo", claims)
 		c.Next()
 	} else {
-		c.AbortWithStatusJSON(401, gin.H{"error": "不合理的token"})
+		c.AbortWithStatusJSON(401, util.Json("token身份信息有误！", nil))
+		return
 	}
 }
 

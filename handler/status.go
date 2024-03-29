@@ -30,7 +30,7 @@ func Status(c *gin.Context) {
 	}
 
 	if err != nil {
-		c.JSON(500, util.Json("查询失败", nil))
+		util.Error(c, 500, "查询失败", err)
 		return
 	}
 

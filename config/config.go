@@ -17,6 +17,7 @@ var Config = struct {
 	AllowCmd []string
 	McFont   string
 	Sql      string
+	Salt     string
 }{}
 
 var Info = struct {
@@ -25,6 +26,14 @@ var Info = struct {
 	ModVer  string
 }{}
 
+func jsonMarshal(v interface{}) ([]byte, error) {
+	return json.MarshalIndent(v, "", "    ")
+}
+
+func xmlMarshal(v interface{}) ([]byte, error) {
+	return xml.MarshalIndent(v, "", "    ")
+}
+
 func Read(config interface{}, path string) error {
 	var marshalFunc func(interface{}) ([]byte, error)
 	var unmarshalFunc func([]byte, interface{}) error
@@ -32,9 +41,9 @@ func Read(config interface{}, path string) error {
 	case ".yaml", ".yml":
 		marshalFunc, unmarshalFunc = yaml.Marshal, yaml.Unmarshal
 	case ".json":
-		marshalFunc, unmarshalFunc = json.Marshal, json.Unmarshal
+		marshalFunc, unmarshalFunc = jsonMarshal, json.Unmarshal
 	case ".xml":
-		marshalFunc, unmarshalFunc = xml.Marshal, xml.Unmarshal
+		marshalFunc, unmarshalFunc = xmlMarshal, xml.Unmarshal
 	default:
 		return errors.New("此文件扩展类型不支持")
 	}

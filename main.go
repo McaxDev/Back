@@ -7,6 +7,7 @@ import (
 
 	cmd "github.com/McaxDev/Back/command"
 	conf "github.com/McaxDev/Back/config"
+	"github.com/McaxDev/Back/entity"
 	mid "github.com/McaxDev/Back/middleWare"
 	"github.com/McaxDev/Back/routine"
 	"github.com/spf13/cobra"
@@ -29,6 +30,9 @@ func main() {
 	if err := conf.ReadDB(); err != nil {
 		log.Fatal("读取数据库失败：", err)
 	}
+
+	conf.DB.AutoMigrate(&entity.ErrorLog{})
+	conf.DB.AutoMigrate(&entity.User{})
 
 	go routine.Backend()
 	go routine.Schedule(10, mid.ClearExpiredChallenge)

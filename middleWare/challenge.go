@@ -3,9 +3,9 @@ package middleWare
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"strconv"
 	"time"
 
+	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,13 +13,21 @@ var chals = make(map[string]time.Time)
 var chalIte = 0
 
 func GetChallenge(c *gin.Context) {
-	chalIteStr := strconv.Itoa(chalIte)
-	chals[chalIteStr] = time.Now().Add(time.Minute)
-	c.JSON(200, gin.H{"challenge": chalIteStr, "date": chals[chalIteStr]})
-	chalIte++
+	str, err := util.RandStr(16)
+	if err != nil {
+		util.Error(c, 500, "随机数生成失败", nil, err)
+		return
+	}
+	if _, exists := chals[str]; exists {
+		util.Error(c, 500, "your luck good", nil, err)
+		return
+	}
+	chals[str] = time.Now().Add(time.Minute)
+	data := gin.H{"challenge": str, "date": chals[str]}
+
 }
 
-func Challenge(realPwd string) gin.HandlerFunc {
+func Challengex(realPwd string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userChal, userHash := c.PostForm("challenge"), c.PostForm("password")
 		if time.Now().Before(chals[userChal]) {

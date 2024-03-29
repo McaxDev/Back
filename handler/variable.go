@@ -10,7 +10,7 @@ import (
 func Variable(c *gin.Context) {
 	variables, err := os.ReadFile("variable.json")
 	if err != nil {
-		c.JSON(500, util.Json("文件读取失败", nil))
+		util.Error(c, 500, "文件读取失败", err)
 		return
 	}
 	c.Data(200, "application/json", variables)
