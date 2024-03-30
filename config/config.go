@@ -72,13 +72,17 @@ func Read(config interface{}, path string) error {
 	return unmarshalFunc(data, config)
 }
 
-func Init() {
+func LoadConfig() {
 	if err := Read(&Config, "config.yaml"); err != nil {
-		log.Fatal("配置文件读取失败：", err)
+		log.Fatalf("重新加载配置文件失败：%v", err)
 	}
 	if err := Read(&SrvInfo, "info.json"); err != nil {
-		log.Fatal("信息读取失败：", err)
+		log.Fatalf("重新加载信息文件失败：%v", err)
 	}
+}
+
+func Init() {
+	LoadConfig()
 	if err := ReadDB(); err != nil {
 		log.Fatal("读取数据库失败：", err)
 	}
