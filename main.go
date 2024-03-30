@@ -8,7 +8,7 @@ import (
 
 	cmd "github.com/McaxDev/Back/command"
 	co "github.com/McaxDev/Back/config"
-	hdlr "github.com/McaxDev/Back/handler"
+	h "github.com/McaxDev/Back/handler"
 	"github.com/McaxDev/Back/routine"
 )
 
@@ -25,7 +25,7 @@ func main() {
 	co.AutoMigrate()
 
 	go routine.Backend()
-	go routine.Schedule(10, hdlr.ClearExpiredChallenge)
+	go routine.Schedule(10, h.ClearExpiredChallenge)
 
 	cmd.ScanCmd()
 	fmt.Println("程序已退出")
