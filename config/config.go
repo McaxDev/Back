@@ -31,7 +31,7 @@ var Config = struct {
 	BackPort: "1314",
 }
 
-var ServerInfo = struct {
+var SrvInfo = struct {
 	MainVer string
 	ScVer   string
 	ModVer  string
@@ -76,7 +76,7 @@ func Init() {
 	if err := Read(&Config, "config.yaml"); err != nil {
 		log.Fatal("配置文件读取失败：", err)
 	}
-	if err := Read(&ServerInfo, "info.json"); err != nil {
+	if err := Read(&SrvInfo, "info.json"); err != nil {
 		log.Fatal("信息读取失败：", err)
 	}
 	if err := ReadDB(); err != nil {

@@ -5,16 +5,17 @@ import (
 	"image/color"
 	"image/draw"
 	"os"
+	"strconv"
 
+	co "github.com/McaxDev/Back/config"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/math/fixed"
 )
 
-// RenderTextOnImage 渲染文本到图片
-func RenderTextOnImage(xPct, yPct, fontSize int, text string, textColor color.Color, img image.Image) (image.Image, error) {
-	// 加载字体文件
-	fontBytes, err := os.ReadFile("path/to/font/file") // 需要指定字体文件路径
+func Draw(x, y, fs int, text string, color string, img image.Image) (image.Image, error) {
+
+	fontBytes, err := os.ReadFile(co.Config.McFont)
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +26,8 @@ func RenderTextOnImage(xPct, yPct, fontSize int, text string, textColor color.Co
 	}
 
 	face, err := opentype.NewFace(f, &opentype.FaceOptions{
-		Size:    float64(fontSize), // 将整数字体大小转换为浮点数
-		DPI:     72,                // 根据需要调整DPI
+		Size:    float64(fs),
+		DPI:     72,
 		Hinting: font.HintingNone,
 	})
 	if err != nil {
@@ -39,16 +40,27 @@ func RenderTextOnImage(xPct, yPct, fontSize int, text string, textColor color.Co
 
 	d := &font.Drawer{
 		Dst:  newImg,
-		Src:  image.NewUniform(textColor),
+		Src:  image.NewUniform(RGBA(color)),
 		Face: face,
 	}
 
-	// 根据百分比计算实际坐标
-	x := (bounds.Dx() * xPct) / 100
-	y := (bounds.Dy() * yPct) / 100
-	d.Dot = fixed.P(x, y)
-
+	d.Dot = fixed.P((bounds.Dx()*x)/100, (bounds.Dy()*y)/100)
 	d.DrawString(text)
 
 	return newImg, nil
+}
+
+func RGBA(hex string) color.Color {
+	var err error
+	if len(hex) != 6 {
+		return color.RGBA{}
+	}
+	var r, g, b uint64
+	r, err = strconv.ParseUint(hex[0:2], 16, 8)
+	g, err = strconv.ParseUint(hex[2:4], 16, 8)
+	b, err = strconv.ParseUint(hex[4:6], 16, 8)
+	if err != nil {
+		return color.RGBA{}
+	}
+	return color.RGBA{uint8(r), uint8(g), uint8(b), 0xff}
 }
