@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/McaxDev/Back/config"
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +28,7 @@ func Gpt(c *gin.Context) {
 	temperature := 0.7
 	if inputed := c.Query("temperature"); inputed != "" {
 		temp, err := strconv.ParseFloat(inputed, 64)
-		if err != nil {
+		if err != nil || temp >= 1.0 || temp <= 0.0 {
 			util.Warn(c, 400, "不合法的temperature值", nil)
 			return
 		}
@@ -52,7 +53,7 @@ func Gpt(c *gin.Context) {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer ")
+	req.Header.Set("Authorization", "Bearer "+config.Config.GptToken)
 
 	// 向GPT发送请求之后向用户发送请求
 	resp, err := (&http.Client{}).Do(req)

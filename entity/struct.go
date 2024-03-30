@@ -8,7 +8,7 @@ import (
 
 type Log struct {
 	gorm.Model
-	Time     string        `gorm:"type:datatime"`
+	Time     string        `gorm:"type:datetime"`
 	Level    string        `gorm:"type:varchar(50)"`
 	Status   int           `gorm:"type:int"`
 	Error    string        `gorm:"type:varchar(255)"`
@@ -30,6 +30,7 @@ type User struct {
 
 type Text struct {
 	gorm.Model
-	Title   string `gorm:"type:varchar(255);unique_index"`
+	Type    string `gorm:"type:varchar(255)"`
+	Title   string `gorm:"type:varchar(255)"`
 	Content string `gorm:"type:text"`
 }

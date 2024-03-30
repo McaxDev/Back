@@ -25,7 +25,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	if !AuthChallenge(challenge, hash, tmp.Password) {
-		util.Warn(c, 401, "密码不正确", nil)
+		util.Warn(c, 403, "密码不正确", nil)
 		return
 	}
 	token, err := GetJwt(int(tmp.ID), tmp.Username, tmp.Admin)

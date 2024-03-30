@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	cmd "github.com/McaxDev/Back/command"
 	conf "github.com/McaxDev/Back/config"
@@ -15,11 +17,6 @@ import (
 )
 
 func main() {
-
-	conf.DB.AutoMigrate(&entity.Log{})
-	conf.DB.AutoMigrate(&entity.User{})
-	conf.DB.AutoMigrate(&entity.Text{})
-
 	exePath, err := os.Executable()
 	if err != nil {
 		util.Fatal("读取程序所在路径失败：", err)
@@ -37,12 +34,26 @@ func main() {
 		util.Fatal("读取数据库失败：", err)
 	}
 
+	conf.DB.AutoMigrate(&entity.Log{})
+	conf.DB.AutoMigrate(&entity.User{})
+	conf.DB.AutoMigrate(&entity.Text{})
+
 	go routine.Backend()
 	go routine.Schedule(10, hdlr.ClearExpiredChallenge)
 
 	rootCmd := &cobra.Command{Use: "axoback"}
 	rootCmd.AddCommand(cmd.Reload)
-	if err := rootCmd.Execute(); err != nil {
-		log.Fatalln(err)
-	}
+	go func() {
+		if err := rootCmd.Execute(); err != nil {
+			log.Fatalln(err)
+		}
+	}()
+
+	// 使用 os/signal 包监听系统信号，保持程序运行
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan // 阻塞，直到收到终止信号
+
+	// 在这里执行退出前的清理工作
+	log.Println("程序正在退出...")
 }

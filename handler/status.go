@@ -15,7 +15,7 @@ func Status(c *gin.Context) {
 	ctx, canc := context.WithTimeout(context.Background(), time.Second*5)
 	defer canc()
 
-	srv := c.Query("srv")
+	srv := c.Query("server")
 
 	var resp *response.FullQuery
 	var err error

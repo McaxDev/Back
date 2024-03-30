@@ -9,12 +9,12 @@ import (
 func GetCaptcha(c *gin.Context) {
 	id := captcha.New()
 	c.Header("Content-Type", "image/png")
+	c.Header("X-Captcha-Id", id)
 	err := captcha.WriteImage(c.Writer, id, captcha.StdWidth, captcha.StdHeight)
 	if err != nil {
 		util.Error(c, 500, "验证码绘制失败", err)
 		return
 	}
-	c.Header("X-Captcha-Id", id)
 }
 
 func Captcha(c *gin.Context) {

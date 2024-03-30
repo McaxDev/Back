@@ -13,7 +13,7 @@ import (
 var Config = struct {
 	RconPwd  string
 	GptToken string
-	JwtKey   []byte
+	JwtKey   string
 	AllowCmd []string
 	McFont   string
 	Sql      string

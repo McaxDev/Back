@@ -48,5 +48,5 @@ func keyFunc(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, fmt.Errorf("错误签名方法 %v", token.Header["alg"])
 	}
-	return config.Config.JwtKey, nil
+	return []byte(config.Config.JwtKey), nil
 }
