@@ -1,6 +1,17 @@
-rconpwd: "A237822x"
-gpttoken: "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"
-jwtkey: "A237822x"
-allowcmd: ["list"]
-mcfont: ""
-sql: "backend:backend@tcp(localhost:3306)/backend?charset=utf8mb4&parseTime=True&loc=Local"
+rconpwd: ""
+gpttoken: ""
+jwtkey: ""
+allowcmd:
+    - list
+    - say
+    - tell
+    - me
+mcfont: /usr/share/fonts/opentype/axo/mc.ttf
+sql: backend:backend@tcp(localhost:3306)/backend?charset=utf8mb4&parseTime=True&loc=Local
+salt: Axolotland Gaming Club
+serverip: 192.168.50.38
+port:
+    main: ""
+    sc: ""
+    mod: ""
+backport: "1314"

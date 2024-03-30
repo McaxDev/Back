@@ -1,10 +1,17 @@
-package entity
+package config
 
 import (
 	"time"
 
 	"gorm.io/gorm"
 )
+
+func AutoMigrate() {
+	DB.AutoMigrate(&Log{})
+	DB.AutoMigrate(&User{})
+	DB.AutoMigrate(&Text{})
+	DB.AutoMigrate(&IPs{})
+}
 
 type Log struct {
 	gorm.Model
@@ -33,4 +40,11 @@ type Text struct {
 	Type    string `gorm:"type:varchar(255)"`
 	Title   string `gorm:"type:varchar(255)"`
 	Content string `gorm:"type:text"`
+}
+
+type IPs struct {
+	gorm.Model
+	Ipv4 string `gorm:"type:varchar(15)"`
+	Ipv6 string `gorm:"type:varchar(39)"`
+	Time string `gorm:"type:datetime"`
 }

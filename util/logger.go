@@ -3,12 +3,10 @@ package util
 import (
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"time"
 
-	"github.com/McaxDev/Back/config"
-	"github.com/McaxDev/Back/entity"
+	co "github.com/McaxDev/Back/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,11 +25,6 @@ func Warn(c *gin.Context, status int, msg string, err error) {
 	c.AbortWithStatusJSON(status, gin.H{"msg": msg, "data": nil})
 }
 
-func Fatal(msg string, err error) {
-	logAndPrint("FATAL", "\033[35m", msg, 0, err)
-	os.Exit(1)
-}
-
 func LogToSQL(c *gin.Context, level string, duration time.Duration) {
 	errString := ""
 	if UnknownErr, exist := c.Get("error"); exist {
@@ -39,7 +32,7 @@ func LogToSQL(c *gin.Context, level string, duration time.Duration) {
 			errString = errToStr(err)
 		}
 	}
-	DBlog := entity.Log{
+	DBlog := co.Log{
 		Time:     time.Now().Format("2006-01-02 15:04:05"),
 		Level:    level,
 		Status:   c.Writer.Status(),
@@ -49,9 +42,23 @@ func LogToSQL(c *gin.Context, level string, duration time.Duration) {
 		Source:   c.ClientIP(),
 		Duration: duration,
 	}
-	if dbErr := config.DB.Create(&DBlog).Error; dbErr != nil {
+	if dbErr := co.DB.Create(&DBlog).Error; dbErr != nil {
 		log.Println("将日志存储到数据库失败：" + dbErr.Error())
 	}
+}
+
+func MyMap(pairs ...interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	n := len(pairs)
+	if n%2 != 0 {
+		n -= 1
+	}
+	for i := 0; i < n; i += 2 {
+		if key, ok := pairs[i].(string); ok {
+			result[key] = pairs[i+1]
+		}
+	}
+	return result
 }
 
 func logAndPrint(level, color, msg string, status int, err error) {

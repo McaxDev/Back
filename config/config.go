@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"errors"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -18,9 +19,19 @@ var Config = struct {
 	McFont   string
 	Sql      string
 	Salt     string
-}{}
+	ServerIP string
+	Port
+	BackPort string
+}{
+	AllowCmd: []string{"list", "say", "tell", "me"},
+	McFont:   "/usr/share/fonts/opentype/axo/mc.ttf",
+	Sql:      "backend:backend@tcp(localhost:3306)/backend?charset=utf8mb4&parseTime=True&loc=Local",
+	Salt:     "Axolotland Gaming Club",
+	ServerIP: "192.168.50.38",
+	BackPort: "1314",
+}
 
-var Info = struct {
+var ServerInfo = struct {
 	MainVer string
 	ScVer   string
 	ModVer  string
@@ -59,4 +70,16 @@ func Read(config interface{}, path string) error {
 		return err
 	}
 	return unmarshalFunc(data, config)
+}
+
+func Init() {
+	if err := Read(&Config, "config.yaml"); err != nil {
+		log.Fatal("配置文件读取失败：", err)
+	}
+	if err := Read(&ServerInfo, "info.json"); err != nil {
+		log.Fatal("信息读取失败：", err)
+	}
+	if err := ReadDB(); err != nil {
+		log.Fatal("读取数据库失败：", err)
+	}
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/McaxDev/Back/config"
+	co "github.com/McaxDev/Back/config"
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -16,7 +16,7 @@ func GetJwt(id int, name string, admin int) (string, error) {
 		"name":  name,
 		"admin": admin,
 	})
-	tokenString, err := token.SignedString(config.Config.JwtKey)
+	tokenString, err := token.SignedString(co.Config.JwtKey)
 	if err != nil {
 		return "", err
 	}
@@ -48,5 +48,5 @@ func keyFunc(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, fmt.Errorf("错误签名方法 %v", token.Header["alg"])
 	}
-	return []byte(config.Config.JwtKey), nil
+	return []byte(co.Config.JwtKey), nil
 }

@@ -3,8 +3,7 @@ package handler
 import (
 	"errors"
 
-	"github.com/McaxDev/Back/config"
-	"github.com/McaxDev/Back/entity"
+	co "github.com/McaxDev/Back/config"
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -14,8 +13,8 @@ func Login(c *gin.Context) {
 	challenge := c.PostForm("challenge")
 	hash := c.PostForm("hash")
 	username := c.PostForm("username")
-	var tmp entity.User
-	err := config.DB.Where("username = ?", username).First(&tmp).Error
+	var tmp co.User
+	err := co.DB.Where("username = ?", username).First(&tmp).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			util.Warn(c, 401, "该用户不存在", err)

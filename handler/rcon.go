@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/McaxDev/Back/config"
+	co "github.com/McaxDev/Back/config"
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 	"github.com/gorcon/rcon"
@@ -15,7 +15,7 @@ func Rcon(c *gin.Context) {
 
 	//判断用户输入的是管理员命令还是普通命令
 	otherCmd := true
-	for _, item := range config.Config.AllowCmd {
+	for _, item := range co.Config.AllowCmd {
 		if cmd == item {
 			otherCmd = false
 			break
@@ -23,7 +23,7 @@ func Rcon(c *gin.Context) {
 	}
 
 	//阻止密码错误时执行管理员命令
-	authed := AuthChallenge(challenge, hash, config.Config.RconPwd)
+	authed := AuthChallenge(challenge, hash, co.Config.RconPwd)
 	if otherCmd && !authed {
 		util.Warn(c, 400, "此命令尚未接入", nil)
 		return
@@ -34,11 +34,11 @@ func Rcon(c *gin.Context) {
 	var err error
 	switch srv {
 	case "sc":
-		conn, err = rcon.Dial("192.168.50.38:25577", config.Config.RconPwd)
+		conn, err = exeCmd(co.Config.Port.Sc)
 	case "mod":
-		conn, err = rcon.Dial("192.168.50.38:25574", config.Config.RconPwd)
+		conn, err = exeCmd(co.Config.Port.Mod)
 	default:
-		conn, err = rcon.Dial("192.168.50.38:25575", config.Config.RconPwd)
+		conn, err = exeCmd(co.Config.Port.Main)
 	}
 	if err != nil {
 		util.Error(c, 500, "连接RCON服务器失败", err)
@@ -51,7 +51,11 @@ func Rcon(c *gin.Context) {
 		util.Error(c, 400, "命令执行失败", err)
 		return
 	}
-	respMap := map[string]interface{}{"info": response}
+	respMap := util.MyMap("info", response)
 	util.Info(c, 200, "命令执行成功", respMap)
 	return
+}
+
+func exeCmd(port string) (*rcon.Conn, error) {
+	return rcon.Dial(co.Config.ServerIP+":"+port, co.Config.RconPwd)
 }
