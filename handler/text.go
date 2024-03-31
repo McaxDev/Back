@@ -16,11 +16,14 @@ func GetText(c *gin.Context) {
 		util.Warn(c, 400, "查无此文", err)
 		return
 	}
-	textMap := map[string]interface{}{"text": tmp.Content}
+	textMap := util.MyMap("author", tmp.Author, "content", tmp.Content)
 	util.Info(c, 200, "查有此文", textMap)
 }
 
 func SetText(c *gin.Context) {
+	userInfo := ReadJwt(c)
+	author := userInfo["name"].(string)
+
 	thetype := c.Query("type")
 	title, text := c.PostForm("title"), c.PostForm("text")
 	var tmp co.Text
@@ -29,7 +32,7 @@ func SetText(c *gin.Context) {
 		util.Warn(c, 400, "此文已存在", err)
 		return
 	}
-	tmp.Type, tmp.Title, tmp.Content = thetype, title, text
+	tmp.Type, tmp.Title, tmp.Content, tmp.Author = thetype, title, text, author
 	if err := co.DB.Create(&tmp).Error; err != nil {
 		util.Error(c, 500, "内容创建失败", err)
 		return

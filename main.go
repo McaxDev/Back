@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -10,9 +9,11 @@ import (
 	co "github.com/McaxDev/Back/config"
 	h "github.com/McaxDev/Back/handler"
 	"github.com/McaxDev/Back/routine"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	exePath, err := os.Executable()
 	if err != nil {
 		log.Fatal("读取程序所在路径失败：", err.Error())
@@ -28,5 +29,4 @@ func main() {
 	go routine.Schedule(10, h.ClearExpiredChallenge)
 
 	cmd.ScanCmd()
-	fmt.Println("程序已退出")
 }

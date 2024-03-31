@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"time"
 
 	"github.com/McaxDev/Back/util"
@@ -32,8 +30,7 @@ func AuthChallenge(challenge, hash, password string) bool {
 		return false
 	}
 	delete(challenges, challenge)
-	hashBytes := sha256.Sum256([]byte(challenge + password))
-	return hash == hex.EncodeToString(hashBytes[:])
+	return hash == util.Encode(challenge+password)
 }
 
 func ClearExpiredChallenge() {

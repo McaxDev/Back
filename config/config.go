@@ -12,16 +12,17 @@ import (
 )
 
 var Config = struct {
-	RconPwd  string
-	GptToken string
-	JwtKey   string
-	AllowCmd []string
-	McFont   string
-	Sql      string
-	Salt     string
-	ServerIP string
+	RconPwd    string
+	GptToken   string
+	JwtKey     string
+	AllowCmd   []string
+	McFont     string
+	Sql        string
+	Salt       string
+	ServerIP   string
+	BackPort   string
+	AvatarPath string
 	Port
-	BackPort string
 }{
 	AllowCmd: []string{"list", "say", "tell", "me"},
 	McFont:   "/usr/share/fonts/opentype/axo/mc.ttf",

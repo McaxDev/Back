@@ -44,6 +44,21 @@ func Jwt(c *gin.Context) {
 	}
 }
 
+func ReadJwt(c *gin.Context) map[string]interface{} {
+	userInfo, exists := c.Get("userInfo")
+	emptyMap := util.MyMap("id", 0, "name", "", "admin", 0)
+	if !exists {
+		util.Warn(c, 401, "解读JWT失败", nil)
+		return emptyMap
+	}
+	claims, ok := userInfo.(jwt.MapClaims)
+	if !ok {
+		util.Error(c, 500, "JWT类型断言失败", nil)
+		return emptyMap
+	}
+	return claims
+}
+
 func keyFunc(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, fmt.Errorf("错误签名方法 %v", token.Header["alg"])

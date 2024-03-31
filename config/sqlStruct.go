@@ -15,7 +15,6 @@ func AutoMigrate() {
 
 type Log struct {
 	gorm.Model
-	Time     string        `gorm:"type:datetime"`
 	Level    string        `gorm:"type:varchar(50)"`
 	Status   int           `gorm:"type:int"`
 	Error    string        `gorm:"type:varchar(255)"`
@@ -32,7 +31,7 @@ type User struct {
 	Password string `gorm:"type:varchar(100)"`
 	Admin    int    `gorm:"type:int"`
 	Gamename string `gorm:"type:varchar(100)"`
-	Avatar   string `gorm:"type:text"`
+	Avatar   string `gorm:"type:varchar(255)"`
 }
 
 type Text struct {
@@ -40,6 +39,7 @@ type Text struct {
 	Type    string `gorm:"type:varchar(255)"`
 	Title   string `gorm:"type:varchar(255)"`
 	Content string `gorm:"type:text"`
+	Author  string `gorm:"type:varchar(255)"`
 }
 
 type IPs struct {
