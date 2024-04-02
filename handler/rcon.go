@@ -4,7 +4,6 @@ import (
 	co "github.com/McaxDev/Back/config"
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
-	"github.com/gorcon/rcon"
 )
 
 func Rcon(c *gin.Context) {
@@ -30,16 +29,9 @@ func Rcon(c *gin.Context) {
 	}
 
 	//向RCON服务器发送命令
-	conn, err := rcon.Dial(co.Config.ServerIP+":"+co.Find(srv, "port"), co.Config.RconPwd)
+	response, err := util.Rcon(srv, cmd)
 	if err != nil {
-		util.Error(c, 500, "连接RCON服务器失败", err)
-		return
-	}
-	defer conn.Close()
-
-	response, err := conn.Execute(cmd)
-	if err != nil {
-		util.Error(c, 400, "命令执行失败", err)
+		util.Error(c, 500, "命令发送失败", err)
 		return
 	}
 	respMap := util.MyMap("info", response)

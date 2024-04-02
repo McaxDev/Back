@@ -16,7 +16,7 @@ func GetChallenge(c *gin.Context) {
 		return
 	}
 	if _, exists := challenges[str]; exists {
-		util.Warn(c, 500, "你太幸运了，请重试", nil)
+		util.Error(c, 500, "你太幸运了，请重试", nil)
 		return
 	}
 	challenges[str] = time.Now().Add(time.Minute)
