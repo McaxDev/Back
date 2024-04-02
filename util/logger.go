@@ -16,10 +16,6 @@ func Info(c *gin.Context, status int, msg string, data map[string]interface{}) {
 	c.JSON(status, gin.H{"msg": msg, "data": data})
 }
 
-func Warn(c *gin.Context, status int, msg string, err error) {
-	c.AbortWithStatusJSON(status, gin.H{"msg": msg, "data": nil})
-}
-
 func LogToSQL(c *gin.Context, level string, duration time.Duration) {
 	errString := ""
 	if UnknownErr, exist := c.Get("error"); exist {
@@ -28,7 +24,6 @@ func LogToSQL(c *gin.Context, level string, duration time.Duration) {
 		}
 	}
 	DBlog := co.Log{
-		Level:    level,
 		Status:   c.Writer.Status(),
 		Error:    errString,
 		Method:   c.Request.Method,

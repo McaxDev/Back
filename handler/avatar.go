@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func setAvatar(c *gin.Context) {
+func SetAvatar(c *gin.Context) {
 	file, err := c.FormFile("avatar")
 	if err != nil {
 		util.Error(c, 500, "服务器错误", err)
@@ -28,4 +28,8 @@ func setAvatar(c *gin.Context) {
 		util.Error(c, 500, "文件保存失败", err)
 		return
 	}
+}
+
+func GetAvatar(c *gin.Context) {
+	username := ReadJwt(c)["username"].(string)
 }
