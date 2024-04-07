@@ -33,7 +33,7 @@ func AuthChallenge(challenge, hash, password string) bool {
 	return hash == util.Encode(challenge+password)
 }
 
-func ClearExpiredChallenge() {
+func clearexpiredchallenge() {
 	now := time.Now()
 	for challenge, expiry := range challenges {
 		if now.After(expiry) {

@@ -39,7 +39,7 @@ func GameBindCode(c *gin.Context) {
 func AuthBindCode(c *gin.Context) {
 	authcode := c.PostForm("authcode")
 	authObj, exist := bindcodes[authcode]
-	if time.Now().After(authObj.Expire) || !exist {
+	if !exist || time.Now().After(authObj.Expire) {
 		util.Error(c, 400, "验证码无效或已过期", nil)
 		return
 	}

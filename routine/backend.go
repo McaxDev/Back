@@ -21,5 +21,6 @@ func Backend() {
 	r.POST("/rcon", h.Captcha, h.Jwt, h.Rcon)
 	r.POST("/gpt", h.Captcha, h.Jwt, h.Gpt)
 	r.POST("/source", h.Captcha, h.Jwt, h.SetText)
+	r.POST("/gamebind", h.Captcha, h.Jwt, h.AuthBindCode)
 	r.Run(":" + co.Config.BackPort)
 }

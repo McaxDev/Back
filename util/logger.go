@@ -8,12 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Error(c *gin.Context, status int, msg string, err error) {
-	c.AbortWithStatusJSON(status, gin.H{"msg": msg, "data": nil})
-}
-
-func Info(c *gin.Context, status int, msg string, data map[string]interface{}) {
-	c.JSON(status, gin.H{"msg": msg, "data": data})
+func Res(msg string, data gin.H) gin.H {
+	return gin.H{"msg": msg, "data": data}
 }
 
 func LogToSQL(c *gin.Context, level string, duration time.Duration) {
@@ -36,7 +32,7 @@ func LogToSQL(c *gin.Context, level string, duration time.Duration) {
 	}
 }
 
-func MyMap(pairs ...interface{}) map[string]interface{} {
+func Data(pairs ...interface{}) gin.H {
 	result := make(map[string]interface{})
 	n := len(pairs)
 	if n%2 != 0 {

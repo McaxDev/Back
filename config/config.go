@@ -11,6 +11,14 @@ type ConfigTemplate struct {
 	AvatarPath string
 	Ports      Server
 	ServerPath Server
+	SMTPConfig
+}
+
+type SMTPConfig struct {
+	SMTPsrv  string
+	SMTPport string
+	SMTPmail string
+	SMTPpwd  string
 }
 
 type Server struct {
