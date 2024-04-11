@@ -64,7 +64,7 @@ func Init() {
 	}
 }
 
-func LogFunc(level string, err error) {
+func ConsoleLog(level string, err error) {
 	syslog := SysLog{
 		Time:    time.Now(),
 		Level:   level,

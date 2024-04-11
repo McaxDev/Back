@@ -1,8 +1,12 @@
 package handler
 
 import (
+	"bytes"
+	"io"
+	"log"
 	"time"
 
+	co "github.com/McaxDev/Back/config"
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 )
@@ -11,15 +15,32 @@ func LogToSQL(c *gin.Context) {
 	startTime := time.Now()
 	c.Next()
 	duration := time.Since(startTime)
-	level := ""
-	status := c.Writer.Status()
-	switch {
-	case status >= 200 && status < 400:
-		level = "INFO"
-	case status >= 400 && status < 500:
-		level = "WARN"
-	case status >= 500 && status < 600:
-		level = "ERROR"
+	errString := ""
+	if UnknownErr, exist := c.Get("error"); exist {
+		if err, ok := UnknownErr.(error); ok {
+			errString = util.ErrToStr(err)
+		}
 	}
-	util.LogToSQL(c, level, duration)
+	username, _ := ReadJwt(c)
+	reqBody, err := io.ReadAll(c.Request.Body)
+	reqBodyStr := string(reqBody)
+	if err != nil {
+		co.ConsoleLog("ERROR", err)
+		return
+	}
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBody))
+	DBlog := co.Log{
+		Username: username,
+		Time:     time.Now(),
+		Status:   c.Writer.Status(),
+		Error:    errString,
+		Duration: duration,
+		Method:   c.Request.Method,
+		Path:     c.Request.URL.Path,
+		Source:   c.ClientIP(),
+		ReqBody:  reqBodyStr,
+	}
+	if dbErr := co.DB.Create(&DBlog).Error; dbErr != nil {
+		log.Println("将日志存储到数据库失败：" + dbErr.Error())
+	}
 }

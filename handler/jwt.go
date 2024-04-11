@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -10,10 +11,9 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func GetJwt(username string, admin bool) (string, error) {
+func GetJwt(userID int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"admin":    admin,
+		"userID": userID,
 	})
 	tokenString, err := token.SignedString(co.Config.JwtKey)
 	if err != nil {
@@ -22,7 +22,7 @@ func GetJwt(username string, admin bool) (string, error) {
 	return tokenString, nil
 }
 
-func Jwt(c *gin.Context) {
+func AuthJwt(c *gin.Context) {
 	Authorization := c.GetHeader("Authorization")
 	if !strings.HasPrefix(Authorization, "Bearer ") {
 		util.Error(c, 400, "token不合法！", nil)
@@ -35,26 +35,11 @@ func Jwt(c *gin.Context) {
 		return
 	}
 	if claims, ok := JwtToken.Claims.(jwt.MapClaims); ok && JwtToken.Valid {
-		c.Set("username", claims["username"])
-		c.Set("admin", claims["admin"])
+		c.Set("userID", claims["userID"])
 	} else {
 		util.Error(c, 401, "token身份信息有误！", nil)
 		return
 	}
-}
-
-func ReadJwt(c *gin.Context) (string, bool) {
-	username, exists := c.Get("username")
-	if !exists {
-		util.Error(c, 401, "解读JWT失败", nil)
-		return "", false
-	}
-	admin, exists := c.Get("admin")
-	if !exists {
-		util.Error(c, 401, "JWT类型断言失败", nil)
-		return "", false
-	}
-	return username.(string), admin.(bool)
 }
 
 func keyFunc(token *jwt.Token) (interface{}, error) {
@@ -62,4 +47,16 @@ func keyFunc(token *jwt.Token) (interface{}, error) {
 		return nil, fmt.Errorf("错误签名方法 %v", token.Header["alg"])
 	}
 	return []byte(co.Config.JwtKey), nil
+}
+
+func ReadJwt(c *gin.Context) (int, error) {
+	jwt, exist := c.Get("userID")
+	if !exist {
+		return 0, errors.New("无法找到JWT")
+	}
+	userid, ok := jwt.(int)
+	if !ok {
+		return 0, errors.New("对JWT中的用户ID断言失败")
+	}
+	return userid, nil
 }

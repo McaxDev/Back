@@ -1,35 +1,17 @@
 package util
 
 import (
-	"log"
-	"time"
-
-	co "github.com/McaxDev/Back/config"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func Res(msg string, data gin.H) gin.H {
-	return gin.H{"msg": msg, "data": data}
+func Error(c *gin.Context, status int, msg string, err error) {
+	c.Set("error", err)
+	c.AbortWithStatusJSON(status, gin.H{"msg": msg, "data": nil})
 }
 
-func LogToSQL(c *gin.Context, level string, duration time.Duration) {
-	errString := ""
-	if UnknownErr, exist := c.Get("error"); exist {
-		if err, ok := UnknownErr.(error); ok {
-			errString = errToStr(err)
-		}
-	}
-	DBlog := co.Log{
-		Status:   c.Writer.Status(),
-		Error:    errString,
-		Method:   c.Request.Method,
-		Path:     c.Request.URL.Path,
-		Source:   c.ClientIP(),
-		Duration: duration,
-	}
-	if dbErr := co.DB.Create(&DBlog).Error; dbErr != nil {
-		log.Println("将日志存储到数据库失败：" + dbErr.Error())
-	}
+func Info(c *gin.Context, status int, msg string, data gin.H) {
+	c.AbortWithStatusJSON(status, gin.H{"msg": msg, "data": data})
 }
 
 func Data(pairs ...interface{}) gin.H {
@@ -46,9 +28,17 @@ func Data(pairs ...interface{}) gin.H {
 	return result
 }
 
-func errToStr(err error) string {
+func ErrToStr(err error) string {
 	if err != nil {
 		return err.Error()
 	}
 	return ""
+}
+
+func DbQueryError(c *gin.Context, err error, message string) {
+	if err == gorm.ErrRecordNotFound {
+		Error(c, 400, message, err)
+	} else {
+		Error(c, 500, "查询失败", err)
+	}
 }

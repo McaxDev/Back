@@ -5,52 +5,49 @@ import (
 	"net/smtp"
 	"time"
 
-	co "github.com/McaxDev/Back/config"
+	"github.com/McaxDev/Back/config"
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 )
 
-var mailSent = make(map[string]MailMemory)
+var mailSent = make(map[string]MailStruct)
 
-type MailMemory struct {
-	Authcode string
+type MailStruct struct {
+	Receiver string
 	Expiry   time.Time
-	LastSent time.Time // 添加最后发送时间字段
 }
 
 func Mailauth(c *gin.Context) {
-	mail := c.Query("mail")
-
-	// 检查是否存在记录，并且距离上次发送时间小于1分钟
-	if mm, found := mailSent[mail]; found && time.Since(mm.LastSent) < time.Minute {
-		c.AbortWithStatusJSON(429, util.Res("request too frequent", nil))
-		return
-	}
-
+	receiver := c.Query("receiver")
 	authcode, err := util.RandStr(6)
 	if err != nil {
-		c.AbortWithStatusJSON(500, util.Res("fail to generate: "+err.Error(), nil))
+		c.AbortWithStatusJSON(500, util.Res("服务器生成验证码失败", nil))
 		return
 	}
-
 	expiry := time.Now().Add(10 * time.Minute)
-	mailSent[mail] = MailMemory{
-		Authcode: authcode,
+	mailSent[authcode] = MailStruct{
+		Receiver: receiver,
 		Expiry:   expiry,
-		LastSent: time.Now(),
 	}
-
-	message := []byte(fmt.Sprintf("Authcode is %s, available in %v.", authcode, expiry))
-	conf := co.Config.SMTPConfig
-	auth := smtp.PlainAuth("", conf.SMTPmail, conf.SMTPpwd, conf.SMTPsrv)
-	to := []string{mail}
-	err = smtp.SendMail(conf.SMTPsrv+":"+conf.SMTPport, auth, conf.SMTPmail, to, message)
+	message := []byte(fmt.Sprintf("你的验证码是%s，%v内有效。", authcode, expiry))
+	conf := config.Config.SMTPConfig
+	auth := smtp.PlainAuth("", conf.Mail, conf.Pwd, conf.Srv)
+	to := []string{receiver}
+	err = smtp.SendMail(conf.Srv+":"+conf.Port, auth, conf.Mail, to, message)
 	if err != nil {
-		c.AbortWithStatusJSON(400, util.Res("fail to send: "+err.Error(), nil))
+		c.AbortWithStatusJSON(400, util.Res("邮件发送失败", nil))
 		return
 	}
+	c.AbortWithStatusJSON(200, util.Res("邮件发送成功", nil))
+}
 
-	c.AbortWithStatusJSON(200, util.Res("send successfully", nil))
+func AuthMail(authcode, receiver string) bool {
+	temp := mailSent[authcode]
+	if temp.Receiver == receiver && time.Now().After(temp.Expiry) {
+		return false
+	}
+	delete(mailSent, authcode)
+	return true
 }
 
 func ClearexpiredMailSent() {

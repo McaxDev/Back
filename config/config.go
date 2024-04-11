@@ -15,16 +15,22 @@ type ConfigTemplate struct {
 }
 
 type SMTPConfig struct {
-	SMTPsrv  string
-	SMTPport string
-	SMTPmail string
-	SMTPpwd  string
+	Srv  string
+	Port string
+	Mail string
+	Pwd  string
 }
 
 type Server struct {
 	Main string `json:"main"`
 	Sc   string `json:"sc"`
 	Mod  string `json:"mod"`
+}
+
+type AssistantID struct {
+	Gpt3 string
+	Gpt4 string
+	Axo  string
 }
 
 var SrvConf = make(map[string]map[string]string)
