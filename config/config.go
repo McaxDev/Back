@@ -12,6 +12,7 @@ type ConfigTemplate struct {
 	Ports      Server
 	ServerPath Server
 	SMTPConfig
+	AssistantID
 }
 
 type SMTPConfig struct {
