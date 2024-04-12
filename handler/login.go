@@ -20,7 +20,7 @@ func Login(c *gin.Context) {
 	}
 
 	//检查密码是否正确
-	if tmp.Password != util.Encode(password) {
+	if tmp.Password != util.Encode(password, false) {
 		util.Error(c, 400, "密码不正确", err)
 		return
 	}

@@ -13,7 +13,7 @@ import (
 
 // 记录已发送的邮箱的map
 var mailSent = make(map[string]MailStruct)
-var ipTimeMap = make(map[string]time.Time)
+var IpTimeMap = make(map[string]time.Time)
 var mu sync.Mutex
 
 // 定义上面map的值的结构体，接受者和过期时间
@@ -31,13 +31,13 @@ func Mailauth(c *gin.Context) {
 	//检查同一个IP是否在一分钟内重复请求
 	clientip := c.ClientIP()
 	mu.Lock()
-	if time.Now().Before(ipTimeMap[clientip].Add(time.Minute)) {
-		lefttime := ipTimeMap[clientip].Add(time.Minute).Sub(time.Now()).Seconds()
+	if time.Now().Before(IpTimeMap[clientip]) {
+		lefttime := IpTimeMap[clientip].Sub(time.Now()).Seconds()
 		mu.Unlock()
 		util.Error(c, 400, fmt.Sprintf("请求频繁，请%.0f秒后重试", lefttime), nil)
 		return
 	}
-	ipTimeMap[clientip] = time.Now()
+	IpTimeMap[clientip] = time.Now().Add(time.Minute)
 	mu.Unlock()
 
 	//生成六位数验证码字符串
@@ -80,7 +80,7 @@ func AuthMail(authcode, receiver string) bool {
 }
 
 // 清理过期的已发送邮件
-func ClearexpiredMailSent() {
+func ClearExpiredMailSent() {
 	now := time.Now()
 	for key, mail := range mailSent {
 		if now.After(mail.Expiry) {

@@ -4,10 +4,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 
-	co "github.com/McaxDev/Back/config"
+	"github.com/McaxDev/Back/config"
 )
 
-func Encode(origin string) string {
-	encodedByte := sha256.Sum256([]byte(origin + co.SrvInfo.Salt))
+func Encode(origin string, withsalt bool) string {
+	if withsalt {
+		origin += config.SrvInfo.Salt
+	}
+	encodedByte := sha256.Sum256([]byte(origin))
 	return hex.EncodeToString(encodedByte[:])
 }

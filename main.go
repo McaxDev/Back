@@ -9,6 +9,7 @@ import (
 	co "github.com/McaxDev/Back/config"
 	h "github.com/McaxDev/Back/handler"
 	"github.com/McaxDev/Back/routine"
+	ut "github.com/McaxDev/Back/util"
 )
 
 func main() {
@@ -33,7 +34,11 @@ func main() {
 	go routine.Backend()
 
 	//执行定时任务
-	go routine.Schedule(10, h.ClearExpiredChallenge, h.ClearexpiredMailSent)
+	go routine.Schedule(10,
+		ut.ClearExpired(h.Challenges),
+		ut.ClearExpired(h.IpTimeMap),
+		h.ClearExpiredMailSent,
+	)
 
 	//监听命令输入
 	cmd.ScanCmd()

@@ -8,20 +8,48 @@ import (
 )
 
 func Signup(c *gin.Context) {
+
+	//从表单数据获取用户名，密码，邮箱，验证码， 游戏名
 	username, password := c.PostForm("username"), c.PostForm("password")
+	email, authcode := c.PostForm("email"), c.PostForm("mailauthcode")
+	gamename := c.PostForm("gamename")
+
+	//验证邮箱验证码是否通过
+	if !AuthMail(authcode, email) {
+		util.Error(c, 400, "邮箱验证码不正确！", nil)
+		return
+	}
+
+	//检查密码复杂度是否足够
 	if err := passwordvalidator.Validate(password, 60.0); err != nil {
 		util.Error(c, 400, "注册失败，密码复杂度不够", err)
 		return
 	}
-	result := co.DB.Where("user_name = ?", username).First(&co.User{})
-	if err := result.Error; err == nil {
+
+	//检查此用户是否已经存在
+	var user co.User
+	if err := co.DB.First(&user, "user_name = ?", username).Error; err == nil {
 		util.Error(c, 403, "该用户已存在", err)
 		return
 	}
-	user := co.User{Username: username, Password: password}
+
+	//将用户信息存储到数据库
+	user.Username = username
+	user.Password = password
+	user.Email = email
+	user.Gamename = gamename
 	if err := co.DB.Create(&user).Error; err != nil {
 		util.Error(c, 500, "无法创建用户", err)
 		return
 	}
-	util.Info(c, 200, "用户创建成功", nil)
+
+	//生成JWT
+	token, err := GetJwt(user.ID)
+	if err != nil {
+		util.Error(c, 500, "用户创建成功，但JWT生成失败", err)
+		return
+	}
+
+	//将JWT发送给用户
+	util.Info(c, 200, "用户创建成功", gin.H{"token": token})
 }

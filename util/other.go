@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,4 +21,16 @@ func MapReadResp(res *http.Response) (gin.H, error) {
 		return nil, errors.New("JSON反序列化失败")
 	}
 	return data, nil
+}
+
+// 清理过期的键值对的值
+func ClearExpired(themap map[string]time.Time) func() {
+	return func() {
+		now := time.Now()
+		for key, expiry := range themap {
+			if now.After(expiry) {
+				delete(themap, key)
+			}
+		}
+	}
 }
