@@ -1,0 +1,16 @@
+rconpwd: ""
+gpttoken: ""
+jwtkey: "5201314"
+allowcmd:
+    - list
+    - say
+    - tell
+    - me
+mcfont: /usr/share/fonts/opentype/axo/mc.ttf
+salt: Axolotland Gaming Club
+serverip: 192.168.50.38
+port:
+    main: "25565"
+    sc: "25566"
+    mod: "25564"
+backport: "1314"

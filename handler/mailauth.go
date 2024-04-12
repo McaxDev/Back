@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/smtp"
+	"sync"
 	"time"
 
 	"github.com/McaxDev/Back/config"
@@ -12,6 +13,8 @@ import (
 
 // 记录已发送的邮箱的map
 var mailSent = make(map[string]MailStruct)
+var ipTimeMap = make(map[string]time.Time)
+var mu sync.Mutex
 
 // 定义上面map的值的结构体，接受者和过期时间
 type MailStruct struct {
@@ -24,6 +27,18 @@ func Mailauth(c *gin.Context) {
 	//从查询字符串参数获得用户邮箱
 	receiver := c.Query("receiver")
 	to := []string{receiver}
+
+	//检查同一个IP是否在一分钟内重复请求
+	clientip := c.ClientIP()
+	mu.Lock()
+	if time.Now().Before(ipTimeMap[clientip].Add(time.Minute)) {
+		lefttime := ipTimeMap[clientip].Add(time.Minute).Sub(time.Now()).Seconds()
+		mu.Unlock()
+		util.Error(c, 400, fmt.Sprintf("请求频繁，请%.0f秒后重试", lefttime), nil)
+		return
+	}
+	ipTimeMap[clientip] = time.Now()
+	mu.Unlock()
 
 	//生成六位数验证码字符串
 	authcode, err := util.RandStr(6)
@@ -40,7 +55,11 @@ func Mailauth(c *gin.Context) {
 	}
 
 	//向请求者发送邮件
-	message := []byte(fmt.Sprintf("你的验证码是%s，%v内有效。", authcode, expiry))
+	fmttedExp := expiry.Format("2006-01-02 15:04")
+	message := []byte("To: " + receiver + "\r\n" +
+		"Subject: 验证码邮件\r\n" +
+		"MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n" +
+		fmt.Sprintf("你的验证码是%s，%v内有效。", authcode, fmttedExp))
 	conf := config.Config.SMTPConfig
 	auth := smtp.PlainAuth("", conf.Mail, conf.Pwd, conf.Srv)
 	if err = smtp.SendMail(conf.Srv+":"+conf.Port, auth, conf.Mail, to, message); err != nil {

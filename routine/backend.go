@@ -16,6 +16,7 @@ func Backend() {
 	r.GET("/source", h.GetText)
 	r.GET("/variable", h.Variable)
 	r.GET("/avatar", h.GetAvatar)
+	r.GET("/getmail", h.Mailauth)
 	r.POST("/login", h.Login)
 	r.POST("/signup", h.Captcha, h.Signup)
 	r.GET("/getip", h.Captcha, h.AuthJwt, h.GetIP)
