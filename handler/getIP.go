@@ -12,6 +12,6 @@ func GetIP(c *gin.Context) {
 		util.Error(c, 500, "IP地址查询失败", err)
 		return
 	}
-	IpMap := util.MyMap("IPv4", tmp.Ipv4, "IPv6", tmp.Ipv6)
+	IpMap := util.Data("IPv4", tmp.Ipv4, "IPv6", tmp.Ipv6)
 	util.Info(c, 200, "IP查询成功", IpMap)
 }

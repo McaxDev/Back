@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 读取application/json的请求体并返回gin.H
 func MapReadResp(res *http.Response) (gin.H, error) {
 	body, err := io.ReadAll(res.Body)
 	if err != nil {

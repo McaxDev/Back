@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -66,7 +65,6 @@ func Init() {
 
 func ConsoleLog(level string, err error) {
 	syslog := SysLog{
-		Time:    time.Now(),
 		Level:   level,
 		Message: err.Error(),
 	}

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/McaxDev/Back/config"
+	co "github.com/McaxDev/Back/config"
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 )
@@ -47,21 +48,21 @@ func AskGpt(c *gin.Context) {
 	}
 
 	//如果使用已有的会话，检查会话id是否存在
-	var session config.GptThread
+	var session co.GptThread
 	if thread != "" {
-		if err := config.DB.First(&session, "thread = ? AND user_id = ?", thread, userID).Error; err != nil {
+		if err := co.DB.First(&session, "thread = ? AND user_id = ?", thread, userID).Error; err != nil {
 			util.DbQueryError(c, err, "找不到对应的会话")
 			return
 		}
 	}
 
 	//检查用户余额是否充足
-	var user config.User
-	if err = config.DB.First(&user, "id = ?", userID).Error; err != nil {
+	var tmp co.AxolotlCoin
+	if err = config.DB.First(&tmp, "user_id = ?", userID).Error; err != nil {
 		util.DbQueryError(c, err, "找不到对应的用户")
 		return
 	}
-	if (model == "4" && user.BlueCoin < 2) || user.WhiteCoin < 2 {
+	if (model == "4" && tmp.Azure < 2) || tmp.Pearl < 2 {
 		util.Error(c, 400, "你的余额不足，无法提问", nil)
 		return
 	}

@@ -8,6 +8,6 @@ import (
 )
 
 func Encode(origin string) string {
-	encodedByte := sha256.Sum256([]byte(origin + co.Config.Salt))
+	encodedByte := sha256.Sum256([]byte(origin + co.SrvInfo.Salt))
 	return hex.EncodeToString(encodedByte[:])
 }

@@ -20,7 +20,7 @@ func GetCaptcha(c *gin.Context) {
 func Captcha(c *gin.Context) {
 	id, userInput := c.PostForm("captchaID"), c.PostForm("captchaValue")
 	if !captcha.VerifyString(id, userInput) {
-		util.Warn(c, 400, "验证码不正确", nil)
+		util.Error(c, 400, "验证码不正确", nil)
 		return
 	}
 	c.Next()

@@ -14,15 +14,15 @@ type playerUUID struct {
 }
 
 func CachePlayerUUID(server string) {
-	usercache := filepath.Join(Find(server, "path"), "usercache.json")
+	usercache := filepath.Join(SrvConf["path"][server], "usercache.json")
 	data, err := os.ReadFile(usercache)
 	if err != nil {
-		LogFunc("ERROR", err)
+		ConsoleLog("ERROR", err)
 		return
 	}
 	var players []playerUUID
 	if err := json.Unmarshal(data, &players); err != nil {
-		LogFunc("ERROR", err)
+		ConsoleLog("ERROR", err)
 		return
 	}
 	for _, player := range players {

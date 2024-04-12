@@ -23,9 +23,9 @@ type SMTPConfig struct {
 }
 
 type Server struct {
-	Main string `json:"main"`
-	Sc   string `json:"sc"`
-	Mod  string `json:"mod"`
+	Main string
+	Sc   string
+	Mod  string
 }
 
 type AssistantID struct {

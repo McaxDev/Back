@@ -10,10 +10,12 @@ import (
 var dbStructs = []interface{}{
 	&Log{},
 	&User{},
+	&AxolotlCoin{},
 	&Text{},
 	&IPs{},
 	&Online{},
 	&SysLog{},
+	&GptThread{},
 }
 
 func AutoMigrate() {
@@ -26,7 +28,8 @@ func AutoMigrate() {
 
 type Log struct {
 	ID       uint
-	Username string
+	User     User `gorm:"foreignKey:userID;references:ID"`
+	UserID   uint `gorm:"column:user_id"`
 	Time     time.Time
 	Status   int
 	Error    string
@@ -41,51 +44,68 @@ type Log struct {
 
 type User struct {
 	gorm.Model
-	Username   string `gorm:"unique_index"`
-	Admin      bool
-	Avatar     string
-	Password   string `gorm:"size:50"`
-	Gamename   string `gorm:"size:30"`
-	Telephone  string `gorm:"size:20"`
-	Email      string `gorm:"size:50"`
-	Profile    string `gorm:"type:text"`
-	WhiteCoin  int
-	BlueCoin   int
-	GptThreads []GptThread `gorm:"foreignkey:UserID"`
+	ID        uint   `gorm:"column:user_id"`
+	Username  string `gorm:"column:user_name;unique_index"`
+	Admin     bool   `gorm:"column:admin"`
+	Avatar    string `gorm:"column:head"`
+	Password  string `gorm:"column:user_pas"`
+	Gamename  string `gorm:"column:game_name;size:30"`
+	Telephone string `gorm:"column:telephone;size:20"`
+	Email     string `gorm:"column:email;size:50"`
+}
+
+func (User) TableName() string {
+	return "userlist"
+}
+
+type AxolotlCoin struct {
+	gorm.Model
+	User   User `gorm:"foreignKey:UserID;references:ID"`
+	UserID uint `gorm:"column:user_id"`
+	Pearl  int  `gorm:"column:pearl_axolotl_coin"`
+	Azure  int  `gorm:"column:azure_axolotl_coin"`
+}
+
+func (AxolotlCoin) TableName() string {
+	return "axolotl_coin"
 }
 
 type Text struct {
 	gorm.Model
-	Type    string
-	Title   string
-	Content string `gorm:"type:text"`
-	Author  string
+	Type     string `gorm:"column:type"`
+	Title    string `gorm:"column:title"`
+	Content  string `gorm:"column:content;type:text"`
+	AuthorID uint   `gorm:"column:author_id"`
+	User     User   `gorm:"foreignKey:AuthorID;references:ID"`
 }
 
 type IPs struct {
-	ID   uint
-	Time time.Time
-	Ipv4 string `gorm:"size:20"`
-	Ipv6 string `gorm:"size:50"`
+	gorm.Model
+	Ipv4 string `gorm:"column:ipv4"`
+	Ipv6 string `gorm:"column:ipv6"`
 }
 
 type Online struct {
-	ID   uint
-	Time time.Time
-	Main int
-	Sc   int
-	Mod  int
+	gorm.Model
+	Main int `gorm:"column:main"`
+	Sc   int `gorm:"column:sc"`
+	Mod  int `gorm:"column:mod"`
+}
+
+func (Online) TableName() string {
+	return "online_info"
 }
 
 type SysLog struct {
-	ID      uint
-	Time    time.Time
-	Level   string `gorm:"size:5"`
-	Message string `gorm:"type:text"`
+	gorm.Model
+	Level   string `gorm:"column:level"`
+	Message string `gorm:"column:message;type:text"`
 }
 
 type GptThread struct {
-	ThreadID   string `gorm:"primaryKey"`
+	gorm.Model
+	ThreadID   string
 	ThreadName string
 	UserID     uint `gorm:"index"`
+	User       User `gorm:"foreignKey:UserID;references:ID"`
 }

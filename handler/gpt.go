@@ -16,7 +16,7 @@ func Gpt(c *gin.Context) {
 	// 获取查询字符串参数
 	text := c.Query("text")
 	if text == "" {
-		util.Warn(c, 400, "缺乏查询字符串参数", nil)
+		util.Error(c, 400, "缺乏查询字符串参数", nil)
 		return
 	}
 	//根据查询字符串判断使用的模型
@@ -29,7 +29,7 @@ func Gpt(c *gin.Context) {
 	if inputed := c.Query("temperature"); inputed != "" {
 		temp, err := strconv.ParseFloat(inputed, 64)
 		if err != nil || temp >= 1.0 || temp <= 0.0 {
-			util.Warn(c, 400, "不合法的temperature值", nil)
+			util.Error(c, 400, "不合法的temperature值", nil)
 			return
 		}
 		temperature = temp

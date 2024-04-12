@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func GetJwt(userID int) (string, error) {
+func GetJwt(userID uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
 	})
@@ -49,12 +49,12 @@ func keyFunc(token *jwt.Token) (interface{}, error) {
 	return []byte(co.Config.JwtKey), nil
 }
 
-func ReadJwt(c *gin.Context) (int, error) {
+func ReadJwt(c *gin.Context) (uint, error) {
 	jwt, exist := c.Get("userID")
 	if !exist {
 		return 0, errors.New("无法找到JWT")
 	}
-	userid, ok := jwt.(int)
+	userid, ok := jwt.(uint)
 	if !ok {
 		return 0, errors.New("对JWT中的用户ID断言失败")
 	}

@@ -34,7 +34,7 @@ func Rcon(c *gin.Context) {
 		util.Error(c, 500, "命令发送失败", err)
 		return
 	}
-	respMap := util.MyMap("info", response)
+	respMap := util.Data("info", response)
 	util.Info(c, 200, "命令执行成功", respMap)
 	return
 }

@@ -1,18 +1,18 @@
 package handler
 
-import (
-	"os"
-	"path/filepath"
-
-	co "github.com/McaxDev/Back/config"
-	"github.com/McaxDev/Back/util"
-	"github.com/gin-gonic/gin"
-)
-
+/*
 func lookup(c *gin.Context) {
-	username := ReadJwt(c)["username"].(string)
-	var tmp co.User
-	err := co.DB.Where("username = ?", username).First(&tmp).Error
+
+	//从jwt里读取用户ID
+	userID, err := ReadJwt(c)
+	if err != nil {
+		util.Error(c, 500, "读取JWT失败", err)
+		return
+	}
+
+	//查询用户的内容
+	var tmp co.Text
+	err := co.DB.First(&tmp, "author_id = ?" userID).Error
 	if err != nil {
 		util.Error(c, 500, "查不到你的信息", err)
 		return
@@ -28,3 +28,4 @@ func lookup(c *gin.Context) {
 	}
 	c.Data(200, "application/json", playerdata)
 }
+*/
