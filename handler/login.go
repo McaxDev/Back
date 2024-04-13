@@ -13,7 +13,7 @@ func Login(c *gin.Context) {
 
 	//从数据库里检查这个用户是否存在
 	var tmp co.User
-	err := co.DB.Where("username = ?", username).First(&tmp).Error
+	err := co.DB.Where("user_name = ?", username).First(&tmp).Error
 	if err != nil {
 		util.DbQueryError(c, err, "该用户不存在")
 		return

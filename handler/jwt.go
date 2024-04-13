@@ -15,7 +15,7 @@ func GetJwt(userID uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
 	})
-	tokenString, err := token.SignedString(co.Config.JwtKey)
+	tokenString, err := token.SignedString([]byte(co.Config.JwtKey))
 	if err != nil {
 		return "", err
 	}

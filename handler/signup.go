@@ -35,7 +35,7 @@ func Signup(c *gin.Context) {
 
 	//将用户信息存储到数据库
 	user.Username = username
-	user.Password = password
+	user.Password = util.Encode(password, false)
 	user.Email = email
 	user.Gamename = gamename
 	if err := co.DB.Create(&user).Error; err != nil {

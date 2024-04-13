@@ -1,13 +1,25 @@
 package routine
 
 import (
+	"time"
+
 	co "github.com/McaxDev/Back/config"
 	h "github.com/McaxDev/Back/handler"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func Backend() {
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true, // 或者指定允许的域名
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"*"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	r.Use(h.LogToSQL)
 	r.GET("/captcha", h.GetCaptcha)
 	r.GET("/challenge", h.GetChallenge)
