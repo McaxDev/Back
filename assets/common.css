@@ -1,0 +1,28 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+.email-container {
+    background-color: #ffffff;
+    padding: 20px;
+    margin: auto;
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.header {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+.content {
+    font-size: 16px;
+    color: #333333;
+}
+.footer {
+    font-size: 12px;
+    color: #777777;
+    margin-top: 20px;
+}
+
