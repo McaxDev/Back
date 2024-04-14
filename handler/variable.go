@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Variable(c *gin.Context) {
-	variables, err := os.ReadFile("variable.json")
+func SrvInfo(c *gin.Context) {
+	variables, err := os.ReadFile("srvinfo.json")
 	if err != nil {
 		util.Error(c, 500, "文件读取失败", err)
 		return

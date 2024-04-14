@@ -1,11 +1,18 @@
 package command
 
 import (
-	"fmt"
-
-	"github.com/sirupsen/logrus"
+	"github.com/abiosoft/ishell"
 )
 
+var logCmd = ishell.Cmd{
+	Name: "log",
+	Help: "Logs a message in the shell",
+	Func: func(c *ishell.Context) {
+		c.Println("Logging something important!")
+	},
+}
+
+/*
 func logCmd(args []string) {
 	subCmd := args[0]
 	switch subCmd {
@@ -38,3 +45,4 @@ func alterLevel(level logrus.Level) {
 	logrus.SetLevel(level)
 	fmt.Println("已成功将当前的日志级别修改为：" + levelStr)
 }
+*/

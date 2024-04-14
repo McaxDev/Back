@@ -1,33 +1,28 @@
 package command
 
 import (
-	"fmt"
-
+	"github.com/abiosoft/ishell"
 	"github.com/gin-gonic/gin"
 )
 
-func ginCmd(args []string) {
-	subCmd := args[0]
-	switch subCmd {
-	case "mode":
-		mode := args[1]
-		switch mode {
-		case "debug":
-			alterMode(gin.DebugMode)
-		case "release":
-			alterMode(gin.ReleaseMode)
-		default:
-			fmt.Println("未知的日志级别：" + mode)
+var ginCmd = ishell.Cmd{
+	Name: "ginmode",
+	Help: "将Gin切换到release、debug或test模式",
+	Func: func(c *ishell.Context) {
+		if len(c.Args) == 0 {
+			c.Println("请提供模式：debug 或 release 或 test")
+			return
 		}
-	default:
-		fmt.Println("未知的命令：" + subCmd)
-	}
-}
-
-func alterMode(mode string) {
-	if mode == gin.Mode() {
-		fmt.Println("当前的GIN模式已经是：" + mode)
-	}
-	gin.SetMode(mode)
-	fmt.Println("已成功将当前的GIN模式设置为：" + mode)
+		mode := c.Args[0]
+		switch mode {
+		case "debug", "release", "test":
+			if mode == gin.Mode() {
+				c.Println("当前的Gin模式已经是" + mode)
+			}
+			gin.SetMode(gin.DebugMode)
+			c.Printf("Gin目前运行在%s模式下\n", mode)
+		default:
+			c.Println("无效的模式，可用模式：debug, release, test")
+		}
+	},
 }

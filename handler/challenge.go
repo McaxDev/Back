@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/McaxDev/Back/util"
@@ -24,11 +25,33 @@ func GetChallenge(c *gin.Context) {
 	util.Info(c, 200, "获取挑战值成功", data)
 }
 
+/*
+	func AuthChallenge(challenge, hash, password string) bool {
+		expiry, exist := Challenges[challenge]
+		if !exist || time.Now().After(expiry) {
+			return false
+		}
+		delete(Challenges, challenge)
+		fmt.Println("真正的哈希值" + util.Encode(password+challenge, false))
+		return hash == util.Encode(password+challenge, false)
+	}
+*/
 func AuthChallenge(challenge, hash, password string) bool {
 	expiry, exist := Challenges[challenge]
-	if !exist || time.Now().After(expiry) {
+	if !exist {
+		fmt.Println("挑战值不存在")
 		return false
 	}
+	if time.Now().After(expiry) {
+		fmt.Println("挑战值已过期")
+		return false
+	}
+	// 如果挑战值存在且没有过期，打印出用于比较的哈希值
+	calculatedHash := util.Encode(password+challenge, false)
+	fmt.Println("真正的哈希值：" + calculatedHash)
+
+	// 删除挑战值
 	delete(Challenges, challenge)
-	return hash == util.Encode(challenge+password, true)
+
+	return hash == calculatedHash
 }

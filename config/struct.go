@@ -14,7 +14,7 @@ func AutoMigrate() {
 		&Text{},
 		&IPs{},
 		&Online{},
-		&SysLog{},
+		&SystemLog{},
 		&GptThread{},
 	)
 }
@@ -90,7 +90,7 @@ func (Online) TableName() string {
 	return "online_info"
 }
 
-type SysLog struct {
+type SystemLog struct {
 	gorm.Model
 	Level   string `gorm:"column:level"`
 	Message string `gorm:"column:message;type:text"`

@@ -13,6 +13,15 @@ import (
 
 func LogToSQL(c *gin.Context) {
 
+	// 读取请求体并复制
+	reqBody, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		co.SysLog("ERROR", err)
+		return
+	}
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBody))
+	reqBodyStr := string(reqBody)
+
 	//获取请求的持续时间
 	startTime := time.Now()
 	c.Next()
@@ -28,15 +37,6 @@ func LogToSQL(c *gin.Context) {
 
 	//从handler里获取用户ID
 	userID, _ := ReadJwt(c)
-
-	//获取请求体字符串
-	reqBody, err := io.ReadAll(c.Request.Body)
-	reqBodyStr := string(reqBody)
-	if err != nil {
-		co.ConsoleLog("ERROR", err)
-		return
-	}
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBody))
 
 	//将日志条目存储到数据库
 	DBlog := co.Log{

@@ -9,19 +9,26 @@ import (
 func Login(c *gin.Context) {
 
 	//从请求体里获得用户名和密码
-	username, password := c.PostForm("username"), c.PostForm("password")
+	var req struct {
+		Username  string `json:"username"`
+		Password  string `json:"password"`
+		Challenge string `json:"challenge"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		util.Error(c, 400, "无法解析请求体", err)
+		return
+	}
 
 	//从数据库里检查这个用户是否存在
 	var tmp co.User
-	err := co.DB.Where("user_name = ?", username).First(&tmp).Error
-	if err != nil {
+	if err := co.DB.First(&tmp, "user_name = ?", req.Username).Error; err != nil {
 		util.DbQueryError(c, err, "该用户不存在")
 		return
 	}
 
 	//检查密码是否正确
-	if tmp.Password != util.Encode(password, false) {
-		util.Error(c, 400, "密码不正确", err)
+	if !AuthChallenge(req.Challenge, req.Password, tmp.Password) {
+		util.Error(c, 400, "密码不正确", nil)
 		return
 	}
 
@@ -33,5 +40,15 @@ func Login(c *gin.Context) {
 	}
 
 	//将JWT发送给用户
-	util.Info(c, 200, "JWT生成成功", gin.H{"token": token})
+	util.Data()
+	util.Info(c, 200, "登录成功", gin.H{
+		"token":     token,
+		"username":  tmp.Username,
+		"uid":       tmp.ID,
+		"admin":     tmp.Admin,
+		"gamename":  tmp.Gamename,
+		"email":     tmp.Email,
+		"avatar":    tmp.Avatar,
+		"telephone": tmp.Telephone,
+	})
 }

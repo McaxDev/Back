@@ -17,12 +17,12 @@ func CachePlayerUUID(server string) {
 	usercache := filepath.Join(SrvConf["path"][server], "usercache.json")
 	data, err := os.ReadFile(usercache)
 	if err != nil {
-		ConsoleLog("ERROR", err)
+		SysLog("ERROR", err)
 		return
 	}
 	var players []playerUUID
 	if err := json.Unmarshal(data, &players); err != nil {
-		ConsoleLog("ERROR", err)
+		SysLog("ERROR", err)
 		return
 	}
 	for _, player := range players {

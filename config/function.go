@@ -51,7 +51,7 @@ func LoadConfig() {
 	if err := Read(&Config, "config.yaml"); err != nil {
 		log.Fatalf("重新加载配置文件失败：%v", err)
 	}
-	if err := Read(&SrvInfo, "info.json"); err != nil {
+	if err := Read(&SrvInfo, "srvinfo.json"); err != nil {
 		log.Fatalf("重新加载信息文件失败：%v", err)
 	}
 }
@@ -63,8 +63,8 @@ func Init() {
 	}
 }
 
-func ConsoleLog(level string, err error) {
-	syslog := SysLog{
+func SysLog(level string, err error) {
+	syslog := SystemLog{
 		Level:   level,
 		Message: err.Error(),
 	}

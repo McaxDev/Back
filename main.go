@@ -4,18 +4,20 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
-	cmd "github.com/McaxDev/Back/command"
+	"github.com/McaxDev/Back/command"
 	co "github.com/McaxDev/Back/config"
 	h "github.com/McaxDev/Back/handler"
 	"github.com/McaxDev/Back/routine"
 	ut "github.com/McaxDev/Back/util"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 
 	//将Gin设置为发布版
-	//gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 
 	//将文件执行路径改为当前路径
 	exePath, err := os.Executable()
@@ -35,11 +37,17 @@ func main() {
 
 	//执行定时任务
 	go routine.Schedule(10,
-		ut.ClearExpired(h.Challenges),
-		ut.ClearExpired(h.IpTimeMap),
-		h.ClearExpiredMailSent,
+		ut.ClearExpired(h.Challenges, func(t time.Time) time.Time {
+			return t
+		}),
+		ut.ClearExpired(h.Mailsent, func(s h.MailStruct) time.Time {
+			return s.Expiry
+		}),
+		ut.ClearExpired(h.IpTimeMap, func(t time.Time) time.Time {
+			return t
+		}),
 	)
 
 	//监听命令输入
-	cmd.ScanCmd()
+	command.Ishell()
 }

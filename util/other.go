@@ -24,11 +24,11 @@ func MapReadResp(res *http.Response) (gin.H, error) {
 }
 
 // 清理过期的键值对的值
-func ClearExpired(themap map[string]time.Time) func() {
+func ClearExpired[K comparable, V any](themap map[K]V, timePos func(V) time.Time) func() {
 	return func() {
 		now := time.Now()
-		for key, expiry := range themap {
-			if now.After(expiry) {
+		for key, value := range themap {
+			if now.After(timePos(value)) {
 				delete(themap, key)
 			}
 		}
