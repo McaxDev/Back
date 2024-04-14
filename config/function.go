@@ -56,7 +56,10 @@ func LoadConfig() {
 	}
 }
 
+// 将系统日志输出到控制台和数据库
 func SysLog(level string, mes string) {
+
+	// 将日志输出到数据库
 	syslog := SystemLog{
 		Level:   level,
 		Message: mes,
@@ -64,7 +67,13 @@ func SysLog(level string, mes string) {
 	if dbErr := DB.Create(&syslog).Error; dbErr != nil {
 		log.Println("将日志存储到数据库失败：" + dbErr.Error())
 	}
-	fmt.Println("系统日志：" + level + mes)
+
+	// 将日志输出到控制台
+	logprinted := "系统日志：" + level + mes
+	if level == "FATAL" {
+		log.Fatal(logprinted)
+	}
+	fmt.Println(logprinted)
 }
 
 func SrvConfInit() {

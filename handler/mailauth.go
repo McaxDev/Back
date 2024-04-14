@@ -1,11 +1,14 @@
 package handler
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"net/smtp"
 	"sync"
 	"time"
 
+	"github.com/McaxDev/Back/assets"
 	co "github.com/McaxDev/Back/config"
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
@@ -15,6 +18,7 @@ import (
 var Mailsent = make(map[string]MailStruct)
 var IpTimeMap = make(map[string]time.Time)
 var mu sync.Mutex
+var tmpl *template.Template
 
 // 定义上面map的值的结构体，接受者和过期时间
 type MailStruct struct {
@@ -65,7 +69,11 @@ func Mailauth(c *gin.Context) {
 	dest := conf.Srv + ":" + conf.Port
 	auth := smtp.PlainAuth("", conf.Mail, conf.Pwd, conf.Srv)
 	to := []string{receiver}
-	content := mailContent(receiver, authcode, fmttedExp)
+	content, err := mailContent(receiver, authcode, fmttedExp)
+	if err != nil {
+		util.Error(c, 500, "邮件内容创建失败", err)
+		return
+	}
 	if err = smtp.SendMail(dest, auth, conf.Mail, to, content); err != nil {
 		util.Error(c, 500, "邮件发送失败", err)
 		return
@@ -73,6 +81,47 @@ func Mailauth(c *gin.Context) {
 	util.Info(c, 200, "邮件发送成功", nil)
 }
 
+// 生成邮件内容
+func mailContent(receiver, authcode, exp string) ([]byte, error) {
+
+	// 从嵌入的文件系统加载和解析邮件模板
+	tmpl, err := template.New("mail_template.html").ParseFS(assets.Fs, "mail_template.html")
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	data := struct {
+		Receiver   string
+		AuthCode   string
+		Expiration string
+	}{
+		Receiver:   receiver,
+		AuthCode:   authcode,
+		Expiration: exp,
+	}
+
+	// 定义邮件头部信息并直接创建为字节切片
+	headers := []byte(
+		"From: Your Name <your-email@example.com>\r\n" +
+			"To: " + receiver + "\r\n" +
+			"Subject: 验证码邮件\r\n" +
+			"MIME-Version: 1.0\r\n" +
+			"Content-Type: text/html; charset=\"UTF-8\"\r\n" +
+			"\r\n",
+	)
+
+	// 直接写入头部信息
+	buf.Write(headers)
+
+	// 执行模板并将生成的HTML添加到邮件内容
+	if err := tmpl.Execute(&buf, data); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+/*
 // 生成邮件界面标记语言
 func mailContent(receiver, authcode, exp string) []byte {
 	return []byte(
@@ -102,6 +151,7 @@ func mailContent(receiver, authcode, exp string) []byte {
 </html>
 `, authcode, exp))
 }
+*/
 
 // 验证邮箱的函数
 func AuthMail(authcode, receiver string) bool {
