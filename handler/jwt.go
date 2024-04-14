@@ -22,6 +22,7 @@ func GetJwt(userID uint) (string, error) {
 	return tokenString, nil
 }
 
+// 验证JWT的handler
 func AuthJwt(c *gin.Context) {
 	Authorization := c.GetHeader("Authorization")
 	if !strings.HasPrefix(Authorization, "Bearer ") {

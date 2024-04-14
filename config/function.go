@@ -56,22 +56,15 @@ func LoadConfig() {
 	}
 }
 
-func Init() {
-	LoadConfig()
-	if err := ReadDB(); err != nil {
-		log.Fatal("读取数据库失败：", err)
-	}
-}
-
-func SysLog(level string, err error) {
+func SysLog(level string, mes string) {
 	syslog := SystemLog{
 		Level:   level,
-		Message: err.Error(),
+		Message: mes,
 	}
 	if dbErr := DB.Create(&syslog).Error; dbErr != nil {
 		log.Println("将日志存储到数据库失败：" + dbErr.Error())
 	}
-	fmt.Println("系统日志：" + level + err.Error())
+	fmt.Println("系统日志：" + level + mes)
 }
 
 func SrvConfInit() {

@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -33,4 +34,28 @@ func ClearExpired[K comparable, V any](themap map[K]V, timePos func(V) time.Time
 			}
 		}
 	}
+}
+
+// 清理过期键值对，但是值是time.Time类型
+func ClearExpDefault[K comparable](themap map[K]time.Time) func() {
+	return ClearExpired(themap, func(t time.Time) time.Time { return t })
+}
+
+// 将请求体读取到结构体
+func BindReq(c *gin.Context, obj interface{}) error {
+
+	// 读取请求体
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		return err
+	}
+
+	// 将数据绑定到结构体
+	if err := json.Unmarshal(bodyBytes, obj); err != nil {
+		return err
+	}
+
+	// 将请求体放回请求
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+	return nil
 }

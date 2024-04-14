@@ -6,17 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func AutoMigrate() {
-	DB.AutoMigrate(
-		&Log{},
-		&User{},
-		&AxolotlCoin{},
-		&Text{},
-		&IPs{},
-		&Online{},
-		&SystemLog{},
-		&GptThread{},
-	)
+var TableList = []interface{}{
+	&Log{},
+	&User{},
+	&AxolotlCoin{},
+	&Text{},
+	&IPs{},
+	&Online{},
+	&SystemLog{},
+	&GptThread{},
 }
 
 type Log struct {

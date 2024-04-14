@@ -4,13 +4,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/McaxDev/Back/command"
 	co "github.com/McaxDev/Back/config"
-	h "github.com/McaxDev/Back/handler"
 	"github.com/McaxDev/Back/routine"
-	ut "github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,24 +26,18 @@ func main() {
 	}
 
 	//初始化配置文件，自动迁移数据库表
-	co.Init()
-	co.AutoMigrate()
+	co.LoadConfig()
+	if err := co.ReadDB(); err != nil {
+		log.Fatal("读取数据库失败：", err)
+	}
+	co.DB.AutoMigrate(co.TableList...)
 
 	//启动后端
 	go routine.Backend()
 
 	//执行定时任务
-	go routine.Schedule(10,
-		ut.ClearExpired(h.Challenges, func(t time.Time) time.Time {
-			return t
-		}),
-		ut.ClearExpired(h.Mailsent, func(s h.MailStruct) time.Time {
-			return s.Expiry
-		}),
-		ut.ClearExpired(h.IpTimeMap, func(t time.Time) time.Time {
-			return t
-		}),
-	)
+	go routine.Schedule(10, routine.ScheduleList...)
+	go routine.DailyTask()
 
 	//监听命令输入
 	command.Ishell()

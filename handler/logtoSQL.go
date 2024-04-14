@@ -16,7 +16,7 @@ func LogToSQL(c *gin.Context) {
 	// 读取请求体并复制
 	reqBody, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		co.SysLog("ERROR", err)
+		co.SysLog("ERROR", err.Error())
 		return
 	}
 	c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBody))
