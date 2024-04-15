@@ -44,7 +44,7 @@ func Backend() {
 	jsonr.POST("/login", h.Captcha, h.Login)
 	jsonr.POST("/signup", h.Signup)
 	jsonr.POST("/rcon", h.Captcha, h.AuthJwt, h.Rcon)
-	jsonr.POST("/gpt", h.RequestHeadersLogger(), h.AuthJwt, h.Gpt)
+	jsonr.POST("/gpt", h.AuthJwt, h.Gpt)
 	jsonr.POST("/source", h.Captcha, h.AuthJwt, h.SetText)
 	jsonr.POST("/gamebind", h.Captcha, h.AuthJwt, h.AuthBindCode)
 

@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
 	"time"
 
 	co "github.com/McaxDev/Back/config"
@@ -12,17 +14,27 @@ import (
 )
 
 // 创建GPT连接客户端
-// var cli = ai.NewClient(co.Config.GptToken)
-var loggingClient = util.NewLoggingClient() // 使用自定义的日志记录客户端
-var cli = ai.NewClientWithHTTPClient(co.Config.GptToken, loggingClient)
+var cli = ai.NewClient(co.Config.GptToken)
+
+func init() {
+	conf := ai.DefaultConfig(co.Config.GptToken)
+	proxyurl, _ := url.Parse("http://127.0.0.1:7890")
+	transport := &http.Transport{
+		Proxy: http.ProxyURL(proxyurl),
+	}
+	conf.HTTPClient = &http.Client{
+		Transport: transport,
+	}
+	cli = ai.NewClientWithConfig(conf)
+}
 
 // 向GPT提问的handler
 func Gpt(c *gin.Context) {
 
 	// 从请求体获得数据
 	var req struct {
-		ThreadID string `json:"thread_id"`
-		GptModel string `json:"gpt_model"`
+		ThreadID string `json:"sessionId"`
+		GptModel string `json:"gptModel"`
 		Message  string `json:"message"`
 	}
 	if err := util.BindReq(c, &req); err != nil {
