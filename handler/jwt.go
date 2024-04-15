@@ -55,9 +55,9 @@ func ReadJwt(c *gin.Context) (uint, error) {
 	if !exist {
 		return 0, errors.New("无法找到JWT")
 	}
-	userid, ok := jwt.(uint)
+	userid, ok := jwt.(float64)
 	if !ok {
 		return 0, errors.New("对JWT中的用户ID断言失败")
 	}
-	return userid, nil
+	return uint(userid), nil
 }

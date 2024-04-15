@@ -63,13 +63,20 @@ func Mailauth(c *gin.Context) {
 		Expiry:   expiry,
 	}
 
+	// 获得客户端住址
+	address, err := util.Locateip(c.ClientIP())
+	if err != nil {
+		util.Error(c, 500, "无法将解析你的地址", err)
+		return
+	}
+
 	//向请求者发送邮件
 	fmttedExp := expiry.Format("2006-01-02 15:04")
 	conf := co.Config.SMTPConfig
 	dest := conf.Srv + ":" + conf.Port
 	auth := smtp.PlainAuth("", conf.Mail, conf.Pwd, conf.Srv)
 	to := []string{receiver}
-	content, err := mailContent(receiver, authcode, fmttedExp)
+	content, err := mailContent(receiver, authcode, fmttedExp, address)
 	if err != nil {
 		util.Error(c, 500, "邮件内容创建失败", err)
 		return
@@ -82,7 +89,7 @@ func Mailauth(c *gin.Context) {
 }
 
 // 生成邮件内容
-func mailContent(receiver, authcode, exp string) ([]byte, error) {
+func mailContent(receiver, authcode, exp, address string) ([]byte, error) {
 
 	// 从嵌入的文件系统加载和解析邮件模板
 	tmpl, err := template.New("mail_template.html").ParseFS(assets.Fs, "mail_template.html")
@@ -94,15 +101,17 @@ func mailContent(receiver, authcode, exp string) ([]byte, error) {
 		Receiver   string
 		AuthCode   string
 		Expiration string
+		Location   string
 	}{
 		Receiver:   receiver,
 		AuthCode:   authcode,
 		Expiration: exp,
+		Location:   address,
 	}
 
 	// 定义邮件头部信息并直接创建为字节切片
 	headers := []byte(
-		"From: Your Name <your-email@example.com>\r\n" +
+		"From: Axolotland Gaming Club <axolotland@163.com>\r\n" +
 			"To: " + receiver + "\r\n" +
 			"Subject: 验证码邮件\r\n" +
 			"MIME-Version: 1.0\r\n" +
@@ -120,38 +129,6 @@ func mailContent(receiver, authcode, exp string) ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
-
-/*
-// 生成邮件界面标记语言
-func mailContent(receiver, authcode, exp string) []byte {
-	return []byte(
-		"To: " + receiver + "\r\n" +
-			"Subject: 验证码邮件\r\n" +
-			"MIME-Version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n" +
-			fmt.Sprintf(`
-<html>
-<head>
-  <style>
-    body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
-    .email-container { background-color: #ffffff; padding: 20px; margin: auto; max-width: 600px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .header { font-size: 20px; margin-bottom: 20px; }
-    .content { font-size: 16px; color: #333333; }
-    .footer { font-size: 12px; color: #777777; margin-top: 20px; }
-  </style>
-</head>
-<body>
-  <div class="email-container">
-    <p class="header">验证码</p>
-    <p class="content">尊敬的用户：</p>
-    <p class="content">您的验证码是<strong>%s</strong>，有效期至%s。</p>
-    <p class="content">请在有效期内使用验证码进行验证。</p>
-    <p class="footer">此邮件由系统自动发送，请勿直接回复。</p>
-  </div>
-</body>
-</html>
-`, authcode, exp))
-}
-*/
 
 // 验证邮箱的函数
 func AuthMail(authcode, receiver string) bool {

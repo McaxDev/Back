@@ -10,7 +10,7 @@ func Error(c *gin.Context, status int, msg string, err error) {
 	c.AbortWithStatusJSON(status, gin.H{"msg": msg, "data": nil})
 }
 
-func Info(c *gin.Context, status int, msg string, data gin.H) {
+func Info(c *gin.Context, status int, msg string, data any) {
 	c.AbortWithStatusJSON(status, gin.H{"msg": msg, "data": data})
 }
 
