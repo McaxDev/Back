@@ -10,6 +10,7 @@ type ConfigTemplate struct {
 	BackPort   string
 	AvatarPath string
 	Ports      Server
+	RconPorts  Server
 	ServerPath Server
 	SMTPConfig
 	AssistantID

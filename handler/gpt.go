@@ -30,6 +30,7 @@ func init() {
 
 // 向GPT提问的handler
 func Gpt(c *gin.Context) {
+	fmt.Println(co.Config.GptToken)
 
 	// 从请求体获得数据
 	var req struct {
@@ -64,11 +65,12 @@ func Gpt(c *gin.Context) {
 		req.ThreadID = thread.ID
 
 		// 将用户的会话信息存储到数据库
-		if err := co.DB.Create(co.GptThread{
+		threadData := co.GptThread{
 			ThreadID:   thread.ID,
 			ThreadName: time.Now().Format("2006-01-02 15:04:05"),
 			UserID:     userID,
-		}).Error; err != nil {
+		}
+		if err := co.DB.Create(&threadData).Error; err != nil {
 			util.Error(c, 500, "无法将你的会话信息存储到数据库", err)
 			return
 		}
@@ -76,7 +78,8 @@ func Gpt(c *gin.Context) {
 	} else { // 使用已有的会话
 
 		// 检查用户是否拥有这个会话
-		err := co.DB.First(co.GptThread{}, "user_id = ? AND thread_id = ?", userID, req.ThreadID).Error
+		var tmp co.GptThread
+		err := co.DB.First(&tmp, "user_id = ? AND thread_id = ?", userID, req.ThreadID).Error
 		if err != nil {
 			util.Error(c, 400, "你没有这个会话", err)
 			return
@@ -100,7 +103,7 @@ func Gpt(c *gin.Context) {
 		asst_id = co.Config.Gpt3
 	case "GPT4":
 		asst_id = co.Config.Gpt4
-	case "HELPER":
+	default:
 		asst_id = co.Config.Axo
 	}
 
@@ -171,38 +174,48 @@ func GptUtil(c *gin.Context) {
 		util.Error(c, 500, "读取用户JWT信息失败", err)
 		return
 	}
-
-	// 检查用户是否拥有这个会话
 	var tmp co.GptThread
-	err = co.DB.First(&tmp, "thread_id = ? AND user_id = ?", threadID, userID).Error
-	if err != nil {
-		util.DbQueryError(c, err, "你没有这个会话")
-		return
-	}
 
 	if threadID == "" { // 如果会话ID为空，就返回这个用户的所有会话
-		var results []map[string]any
-		result := co.DB.Model(&tmp).Select("thread_id", "thread_name").Find(&tmp, "user_id = ?", userID)
-		if err := result.Error; err != nil {
+		var threads []co.GptThread
+		err := co.DB.Where("user_id = ?", userID).Find(&threads).Error
+		if err != nil {
 			util.Error(c, 500, "无法查找你的所有会话", err)
 			return
 		}
+		var results []map[string]interface{} // 确保此处使用interface{}
+		for _, thread := range threads {
+			results = append(results, map[string]interface{}{
+				"thread_id":   thread.ThreadID,
+				"thread_name": thread.ThreadName,
+			})
+		}
 		util.Info(c, 200, "会话信息查找完成", results)
 
-	} else if threadName == "" { // 如果会话名称为空，删除会话
-		result := co.DB.Delete(&tmp, "thread_id = ?", threadID)
-		if err := result.Error; err != nil {
-			util.Error(c, 500, "无法删除这个会话", err)
-			return
-		}
-		util.Info(c, 200, "会话删除成功", nil)
+	} else {
 
-	} else { // 如果会话名称不为空，将会话改名
-		result := co.DB.Model(&tmp).Update("thread_name", threadName)
-		if err := result.Error; err != nil {
-			util.Error(c, 500, "无法修改这个会话的名称", err)
+		// 检查用户是否拥有这个会话
+		err = co.DB.First(&tmp, "thread_id = ? AND user_id = ?", threadID, userID).Error
+		if err != nil {
+			util.DbQueryError(c, err, "你没有这个会话")
 			return
 		}
-		util.Info(c, 200, "会话名称修改成功", nil)
+
+		if threadName == "" { // 如果会话名称为空，删除会话
+			result := co.DB.Delete(&tmp, "thread_id = ?", threadID)
+			if err := result.Error; err != nil {
+				util.Error(c, 500, "无法删除这个会话", err)
+				return
+			}
+			util.Info(c, 200, "会话删除成功", nil)
+
+		} else { // 如果会话名称不为空，将会话改名
+			result := co.DB.Model(&tmp).Update("thread_name", threadName)
+			if err := result.Error; err != nil {
+				util.Error(c, 500, "无法修改这个会话的名称", err)
+				return
+			}
+			util.Info(c, 200, "会话名称修改成功", nil)
+		}
 	}
 }
