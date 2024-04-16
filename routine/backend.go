@@ -37,26 +37,33 @@ func Backend() {
 	r.GET("/srvinfo", h.SrvInfo)
 	r.GET("/avatar", h.GetAvatar)
 	r.GET("/getmail", h.Mailauth)
-	r.GET("/getip", h.Captcha, h.AuthJwt, h.GetIP)
 
-	//内容类型application/json的POST请求的路由逻辑
+	// 对POST请求检查内容类型application/json的路由逻辑
 	jsonr := r.Group("/", conType("application/json"))
 	jsonr.POST("/login", h.Captcha, h.Login)
 	jsonr.POST("/signup", h.Signup)
-	jsonr.POST("/rcon", h.Captcha, h.AuthJwt, h.Rcon)
-	jsonr.POST("/gpt", h.AuthJwt, h.Gpt)
-	jsonr.POST("/source", h.Captcha, h.AuthJwt, h.SetText)
-	jsonr.POST("/gamebind", h.Captcha, h.AuthJwt, h.AuthBindCode)
+
+	// 内容为json而且要求jwt的请求的路由逻辑
+	jsonjwtr := jsonr.Group("/", h.AuthJwt)
+	jsonjwtr.GET("/gptutil", h.GptUtil)
+	jsonjwtr.POST("/gpt", h.Gpt)
+
+	// 内容为json而且要求jwt而且要求人机验证的路由逻辑
+	jsonjwtcapr := jsonjwtr.Group("/", h.Captcha)
+	jsonjwtcapr.GET("/getip", h.GetIP)
+	jsonjwtcapr.POST("/rcon", h.Rcon)
+	jsonjwtcapr.POST("/source", h.SetText)
+	jsonjwtcapr.POST("/gamebind", h.AuthBindCode)
 
 	//启动后端
 	r.Run(":" + co.Config.BackPort)
 }
 
 // 创建检查内容类型中间件的工厂函数
-func conType(allowedType string) gin.HandlerFunc {
+func conType(allowed string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.Request.Header.Get("Content-Type") != allowedType {
-			util.Error(c, 400, "不接受此请求体格式，请使用"+allowedType, nil)
+		if c.Request.Method == "POST" && c.Request.Header.Get("Content-Type") != allowed {
+			util.Error(c, 400, "不接受此请求体格式，请使用"+allowed, nil)
 			return
 		}
 	}

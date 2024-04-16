@@ -158,3 +158,51 @@ func FetchMessages(cli *ai.Client, threadID string) ([]ai.Message, error) {
 	}
 	return messages.Messages, nil
 }
+
+// 修改会话名称或删除会话
+func GptUtil(c *gin.Context) {
+
+	// 从用户的请求体里获得查询字符串参数
+	threadID, threadName := c.Query("thread_id"), c.Query("thread_name")
+
+	// 从JWT里获取用户ID
+	userID, err := ReadJwt(c)
+	if err != nil {
+		util.Error(c, 500, "读取用户JWT信息失败", err)
+		return
+	}
+
+	// 检查用户是否拥有这个会话
+	var tmp co.GptThread
+	err = co.DB.First(&tmp, "thread_id = ? AND user_id = ?", threadID, userID).Error
+	if err != nil {
+		util.DbQueryError(c, err, "你没有这个会话")
+		return
+	}
+
+	if threadID == "" { // 如果会话ID为空，就返回这个用户的所有会话
+		var results []map[string]any
+		result := co.DB.Model(&tmp).Select("thread_id", "thread_name").Find(&tmp, "user_id = ?", userID)
+		if err := result.Error; err != nil {
+			util.Error(c, 500, "无法查找你的所有会话", err)
+			return
+		}
+		util.Info(c, 200, "会话信息查找完成", results)
+
+	} else if threadName == "" { // 如果会话名称为空，删除会话
+		result := co.DB.Delete(&tmp, "thread_id = ?", threadID)
+		if err := result.Error; err != nil {
+			util.Error(c, 500, "无法删除这个会话", err)
+			return
+		}
+		util.Info(c, 200, "会话删除成功", nil)
+
+	} else { // 如果会话名称不为空，将会话改名
+		result := co.DB.Model(&tmp).Update("thread_name", threadName)
+		if err := result.Error; err != nil {
+			util.Error(c, 500, "无法修改这个会话的名称", err)
+			return
+		}
+		util.Info(c, 200, "会话名称修改成功", nil)
+	}
+}
