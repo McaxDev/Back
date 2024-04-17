@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-func Timeout(second int) context.Context {
-	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
-	return ctx
+// 创建一个在指定秒数后超时的context
+func Timeout(second int) (context.Context, func()) {
+	ctx, canc := context.WithTimeout(context.Background(), time.Minute)
+	return ctx, canc
 }

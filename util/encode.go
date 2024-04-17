@@ -7,6 +7,7 @@ import (
 	"github.com/McaxDev/Back/config"
 )
 
+// 使用sha256对字符串进行加密
 func Encode(origin string, withsalt bool) string {
 	if withsalt {
 		origin += config.SrvInfo.Salt

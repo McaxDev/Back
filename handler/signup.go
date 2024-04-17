@@ -35,15 +35,18 @@ func Signup(c *gin.Context) {
 	}
 
 	//检查此用户是否已经存在
-	var user co.User
-	if err := co.DB.First(&user, "user_name = ?", req.Username).Error; err == nil {
+	if err := co.DB.First(&co.User{}, "user_name = ?", req.Username).Error; err == nil {
 		util.Error(c, 403, "该用户已存在", err)
 		return
 	}
 
 	//将用户信息存储到数据库
-	user.Username, user.Password = req.Username, req.Password
-	user.Email, user.Gamename = req.Email, req.Gamename
+	user := co.User{
+		Username: req.Username,
+		Password: req.Password,
+		Email:    req.Email,
+		Gamename: req.Gamename,
+	}
 	if err := co.DB.Create(&user).Error; err != nil {
 		util.Error(c, 500, "无法创建用户", err)
 		return

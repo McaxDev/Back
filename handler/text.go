@@ -20,8 +20,10 @@ func GetText(c *gin.Context) {
 	}
 
 	//将文案作为响应体返回给客户端
-	textMap := util.Data("author", tmp.User.ID, "content", tmp.Content)
-	util.Info(c, 200, "查有此文", textMap)
+	util.Info(c, 200, "查有此文", gin.H{
+		"author":  tmp.User.ID,
+		"content": tmp.Content,
+	})
 }
 
 // 用户设置文案的handler

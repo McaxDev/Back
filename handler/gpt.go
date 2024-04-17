@@ -69,8 +69,12 @@ func Gpt(c *gin.Context) {
 
 	if req.ThreadID == "" { // 创建新的会话
 
+		// 创建一个等待会话超时的上下文
+		ctx, canc := util.Timeout(30)
+		defer canc()
+
 		// 创建会话
-		thread, err := cli.CreateThread(util.Timeout(30), ai.ThreadRequest{
+		thread, err := cli.CreateThread(ctx, ai.ThreadRequest{
 			Messages: []ai.ThreadMessage{{
 				Role:    ai.ThreadMessageRole("user"),
 				Content: req.Message,
@@ -79,6 +83,8 @@ func Gpt(c *gin.Context) {
 			util.Error(c, 500, "会话创建失败", err)
 			return
 		}
+
+		// 将请求里的会话ID修改为新创建的会话ID
 		req.ThreadID = thread.ID
 
 		// 将用户的会话信息存储到数据库
@@ -102,8 +108,12 @@ func Gpt(c *gin.Context) {
 			return
 		}
 
+		// 创建一个等待会话超时的上下文
+		ctx, canc := util.Timeout(30)
+		defer canc()
+
 		// 将用户的消息添加到会话里
-		if _, err := cli.CreateMessage(util.Timeout(30), req.ThreadID, ai.MessageRequest{
+		if _, err := cli.CreateMessage(ctx, req.ThreadID, ai.MessageRequest{
 			Role:    "user",
 			Content: req.Message,
 		}); err != nil {
@@ -121,8 +131,12 @@ func Gpt(c *gin.Context) {
 		asst.AssistantID = co.Config.AsstID["GPT4"]
 	}
 
+	// 创建一个等待会话超时的上下文
+	ctx, canc := util.Timeout(30)
+	defer canc()
+
 	// 生成回答
-	run, err := cli.CreateRun(util.Timeout(30), req.ThreadID, asst)
+	run, err := cli.CreateRun(ctx, req.ThreadID, asst)
 	if err != nil {
 		util.Error(c, 500, "无法生成回答", err)
 		return
@@ -247,7 +261,12 @@ func PollRunStatus(cli *ai.Client, threadID, runID string) (mes []GptMessage, er
 
 // 从openai的thread里提取内容到GptMessage切片
 func FetchMessages(cli *ai.Client, threadID string) (destination []GptMessage, err error) {
-	messages, err := cli.ListMessage(util.Timeout(30), threadID, nil, nil, nil, nil)
+
+	// 创建一个等待会话超时的上下文
+	ctx, canc := util.Timeout(30)
+	defer canc()
+
+	messages, err := cli.ListMessage(ctx, threadID, nil, nil, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("无法列出消息：%w", err)
 	}
@@ -263,6 +282,7 @@ func FetchMessages(cli *ai.Client, threadID string) (destination []GptMessage, e
 	return
 }
 
+// 将GPT的id翻译为gpt模型号的函数
 func DetectGptModel(asstid string) string {
 	for key, value := range co.Config.AsstID {
 		if asstid == value {

@@ -8,9 +8,15 @@ import (
 
 // 获取captcha验证码
 func GetCaptcha(c *gin.Context) {
+
+	// 生成验证码ID
 	id := captcha.New()
+
+	// 设置响应头
 	c.Header("Content-Type", "image/png")
 	c.Header("X-Captcha-Id", id)
+
+	// 发送响应体图片
 	err := captcha.WriteImage(c.Writer, id, captcha.StdWidth, captcha.StdHeight)
 	if err != nil {
 		util.Error(c, 500, "验证码绘制失败", err)

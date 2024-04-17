@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+// 通过用户id获取jwt
 func GetJwt(userID uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID": userID,
@@ -43,6 +44,7 @@ func AuthJwt(c *gin.Context) {
 	}
 }
 
+// 对生成jwt进行签名的函数
 func keyFunc(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, fmt.Errorf("错误签名方法 %v", token.Header["alg"])
@@ -50,6 +52,7 @@ func keyFunc(token *jwt.Token) (interface{}, error) {
 	return []byte(co.Config.JwtKey), nil
 }
 
+// 通过请求里的jwt读取用户ID的函数
 func ReadJwt(c *gin.Context) (uint, error) {
 	jwt, exist := c.Get("userID")
 	if !exist {

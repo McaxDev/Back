@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 将请求的信息存储到数据库的中间件
 func LogToSQL(c *gin.Context) {
 
 	// 读取请求体并复制

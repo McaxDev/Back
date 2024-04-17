@@ -69,15 +69,15 @@ func Mailauth(c *gin.Context) {
 	//向请求者发送邮件
 	fmttedExp := expiry.Format("2006-01-02 15:04")
 	conf := co.Config.SMTPConfig
-	dest := conf.Srv + ":" + conf.Port
-	auth := smtp.PlainAuth("", conf.Mail, conf.Pwd, conf.Srv)
+	dest := conf["server"] + ":" + conf["port"]
+	auth := smtp.PlainAuth("", conf["mail"], conf["password"], conf["server"])
 	to := []string{receiver}
 	content, err := mailContent(receiver, authcode, fmttedExp, address)
 	if err != nil {
 		util.Error(c, 500, "邮件内容创建失败", err)
 		return
 	}
-	if err = smtp.SendMail(dest, auth, conf.Mail, to, content); err != nil {
+	if err = smtp.SendMail(dest, auth, conf["mail"], to, content); err != nil {
 		util.Error(c, 500, "邮件发送失败", err)
 		return
 	}

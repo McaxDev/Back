@@ -10,14 +10,11 @@ type ConfigTemplate struct {
 	BackPort   string
 	AvatarPath string
 	ProxyAddr  string
-	Server     map[string]map[string]string
-	SMTPConfig struct {
-		Srv  string
-		Port string
-		Mail string
-		Pwd  string
-	}
-	AsstID map[string]string
+	ServerPort map[string]int
+	RconPort   map[string]int
+	ServerPath map[string]string
+	AsstID     map[string]string
+	SMTPConfig map[string]string
 }
 
 var Config = ConfigTemplate{
@@ -26,20 +23,30 @@ var Config = ConfigTemplate{
 	ServerIP:  "192.168.50.38",
 	BackPort:  "1314",
 	ProxyAddr: "http://127.0.0.1:7890",
-	Server: map[string]map[string]string{
-		"port":     serversconf,
-		"rconport": serversconf,
-		"path":     serversconf,
+	ServerPort: map[string]int{
+		"main": 25565,
+		"sc":   25566,
+		"mod":  25564,
+	},
+	RconPort: map[string]int{
+		"main": 25575,
+		"sc":   25576,
+		"mod":  25574,
+	},
+	ServerPath: map[string]string{
+		"main": "/srv/main/",
+		"sc":   "/srv/sc/",
+		"mod":  "/srv/mod/",
 	},
 	AsstID: map[string]string{
 		"GPT3.5": "",
 		"GPT4":   "",
 		"HELPER": "",
 	},
-}
-
-var serversconf = map[string]string{
-	"main": "",
-	"sc":   "",
-	"mod":  "",
+	SMTPConfig: map[string]string{
+		"server":   "smtp.163.com",
+		"port":     "25",
+		"mail":     "axolotland@163.com",
+		"password": "",
+	},
 }

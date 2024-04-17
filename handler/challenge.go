@@ -7,30 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 存储挑战值的数据结构
 var Challenges = make(map[string]time.Time)
 
+// 用户获取挑战值
 func GetChallenge(c *gin.Context) {
-	str := util.RandStr(16)
-	if _, exists := Challenges[str]; exists {
-		util.Error(c, 500, "你太幸运了，请重试", nil)
-		return
-	}
-	Challenges[str] = time.Now().Add(time.Minute)
-	data := gin.H{"challenge": str, "date": Challenges[str]}
-	util.Info(c, 200, "获取挑战值成功", data)
-}
 
-/*
-	func AuthChallenge(challenge, hash, password string) bool {
-		expiry, exist := Challenges[challenge]
-		if !exist || time.Now().After(expiry) {
-			return false
-		}
-		delete(Challenges, challenge)
-		fmt.Println("真正的哈希值" + util.Encode(password+challenge, false))
-		return hash == util.Encode(password+challenge, false)
-	}
-*/
+	// 生成并存储挑战值
+	str := util.RandStr(16)
+	Challenges[str] = time.Now().Add(time.Minute)
+
+	// 将挑战值发送给用户
+	util.Info(c, 200, "获取挑战值成功", gin.H{
+		"challenge": str,
+		"date":      Challenges[str],
+	})
+}
 
 // 验证挑战值加密的密码是否正确
 func AuthChallenge(challenge, hash, password string) bool {

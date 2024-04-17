@@ -54,8 +54,8 @@ type AxolotlCoin struct {
 	gorm.Model
 	User   User `gorm:"foreignKey:UserID;references:ID"`
 	UserID uint `gorm:"column:user_id;type:uint"`
-	Pearl  int  `gorm:"column:pearl_axolotl_coin"`
-	Azure  int  `gorm:"column:azure_axolotl_coin"`
+	Pearl  int  `gorm:"column:pearl_axolotl_coin;default:50"`
+	Azure  int  `gorm:"column:azure_axolotl_coin;default:0"`
 }
 
 func (AxolotlCoin) TableName() string {

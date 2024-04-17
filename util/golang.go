@@ -7,3 +7,13 @@ func Deref[T any](ptr *T) T {
 	}
 	return *new(T)
 }
+
+// 检查一个元素是否存在于一个切片里
+func Contain[T comparable](slice []T, val T) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
+}

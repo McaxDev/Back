@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 用户登录的逻辑函数
 func Login(c *gin.Context) {
 
 	//从请求体里获得用户名和密码
