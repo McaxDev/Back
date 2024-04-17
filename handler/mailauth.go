@@ -50,11 +50,7 @@ func Mailauth(c *gin.Context) {
 	}
 
 	//生成六位数验证码字符串
-	authcode, err := util.RandStr(6)
-	if err != nil {
-		util.Error(c, 500, "服务器生成验证码失败", err)
-		return
-	}
+	authcode := util.RandStr(6)
 
 	//生成过期时间并将验证码存到map里面
 	expiry := time.Now().Add(10 * time.Minute)

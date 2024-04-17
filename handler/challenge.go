@@ -10,11 +10,7 @@ import (
 var Challenges = make(map[string]time.Time)
 
 func GetChallenge(c *gin.Context) {
-	str, err := util.RandStr(16)
-	if err != nil {
-		util.Error(c, 500, "随机数生成失败", err)
-		return
-	}
+	str := util.RandStr(16)
 	if _, exists := Challenges[str]; exists {
 		util.Error(c, 500, "你太幸运了，请重试", nil)
 		return

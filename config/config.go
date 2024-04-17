@@ -10,25 +10,14 @@ type ConfigTemplate struct {
 	BackPort   string
 	AvatarPath string
 	ProxyAddr  string
-	Ports      Server
-	RconPorts  Server
-	ServerPath Server
+	Server     map[string]map[string]string
 	SMTPConfig struct {
 		Srv  string
 		Port string
 		Mail string
 		Pwd  string
 	}
-	AssistantID struct {
-		Gpt3 string
-		Axo  string
-	}
-}
-
-type Server struct {
-	Main string
-	Sc   string
-	Mod  string
+	AsstID map[string]string
 }
 
 var SrvConf = make(map[string]map[string]string)
@@ -39,14 +28,20 @@ var Config = ConfigTemplate{
 	ServerIP:  "192.168.50.38",
 	BackPort:  "1314",
 	ProxyAddr: "http://127.0.0.1:7890",
-	Ports: Server{
-		Main: "8000",
-		Sc:   "8001",
-		Mod:  "8002",
+	Server: map[string]map[string]string{
+		"port":     serversconf,
+		"rconport": serversconf,
+		"path":     serversconf,
 	},
-	ServerPath: Server{
-		Main: "/srv/main/",
-		Sc:   "/srv/sc/",
-		Mod:  "/srv/mod/",
+	AsstID: map[string]string{
+		"GPT3.5": "",
+		"GPT4":   "",
+		"HELPER": "",
 	},
+}
+
+var serversconf = map[string]string{
+	"main": "",
+	"sc":   "",
+	"mod":  "",
 }

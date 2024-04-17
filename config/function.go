@@ -75,14 +75,3 @@ func SysLog(level string, mes string) {
 	}
 	fmt.Println(logprinted)
 }
-
-func SrvConfInit() {
-	SrvConf["port"] = make(map[string]string)
-	SrvConf["path"] = make(map[string]string)
-	SrvConf["port"]["main"] = Config.Ports.Main
-	SrvConf["port"]["sc"] = Config.Ports.Sc
-	SrvConf["port"]["mod"] = Config.Ports.Mod
-	SrvConf["path"]["main"] = Config.ServerPath.Main
-	SrvConf["path"]["sc"] = Config.ServerPath.Sc
-	SrvConf["path"]["mod"] = Config.ServerPath.Mod
-}

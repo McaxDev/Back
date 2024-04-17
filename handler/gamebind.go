@@ -18,17 +18,13 @@ var bindcodes = make(map[string]bindStruct)
 
 func GameBindCode(c *gin.Context) {
 	srv, gamename := c.PostForm("server"), c.PostForm("gamename")
-	bindcode, err := util.RandStr(6)
-	if err != nil {
-		util.Error(c, 500, "绑定验证码生成失败", err)
-		return
-	}
+	bindcode := util.RandStr(6)
 	bindcodes[bindcode] = bindStruct{
 		Gamename: gamename,
 		Expire:   time.Now().Add(10 * time.Minute),
 	}
 	command := fmt.Sprintf("tell %s 你的验证码是 %s", gamename, bindcode)
-	_, err = util.Rcon(srv, command)
+	_, err := util.Rcon(srv, command)
 	if err != nil {
 		util.Error(c, 500, "验证码无法送达MC服务器", err)
 		return

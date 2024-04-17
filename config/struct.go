@@ -34,16 +34,16 @@ type Log struct {
 }
 
 type User struct {
-	ID        uint `gorm:"column:user_id;primaryKey;auto_increment;type:uint"`
+	ID        uint `gorm:"column:user_id;primaryKey;auto_increment;type:uint" json:"uid"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Username  string `gorm:"column:user_name;unique_index;size:255;not null"`
-	Admin     bool   `gorm:"column:admin"`
-	Avatar    string `gorm:"column:head"`
-	Password  string `gorm:"column:user_pas"`
-	Gamename  string `gorm:"column:game_name;size:30;not null"`
-	Telephone string `gorm:"column:telephone;size:20"`
-	Email     string `gorm:"column:email;size:50"`
+	Username  string `gorm:"column:user_name;unique_index;size:255;not null" json:"username"`
+	Admin     bool   `gorm:"column:admin" json:"admin"`
+	Avatar    string `gorm:"column:head" json:"avatar"`
+	Password  string `gorm:"column:user_pas" json:"status"`
+	Gamename  string `gorm:"column:game_name;size:30;not null" json:"gamename"`
+	Telephone string `gorm:"column:telephone;size:20" json:"telephone"`
+	Email     string `gorm:"column:email;size:50" json:"email"`
 }
 
 func (User) TableName() string {

@@ -40,7 +40,6 @@ func Login(c *gin.Context) {
 	}
 
 	//将JWT发送给用户
-	util.Data()
 	util.Info(c, 200, "登录成功", gin.H{
 		"token":     token,
 		"username":  tmp.Username,

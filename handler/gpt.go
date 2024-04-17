@@ -26,7 +26,7 @@ type GptMessage struct {
 	MessageID string    `json:"messageId"`
 	Role      string    `json:"role"`
 	Time      time.Time `json:"time"`
-	GptModel  any       `json:"gptModel"`
+	GptModel  string    `json:"gptModel"`
 	Content   string    `json:"content"`
 }
 
@@ -50,11 +50,11 @@ func init() {
 func Gpt(c *gin.Context) {
 
 	// 从请求体获得数据
-	var req struct {
+	var req = struct {
 		ThreadID string `json:"sessionId"`
 		GptModel string `json:"gptModel"`
 		Message  string `json:"message"`
-	}
+	}{GptModel: "GPT3.5"}
 	if err := util.BindReq(c, &req); err != nil {
 		util.Error(c, 400, "你的请求体格式不正确", err)
 		return
@@ -72,9 +72,8 @@ func Gpt(c *gin.Context) {
 		// 创建会话
 		thread, err := cli.CreateThread(util.Timeout(30), ai.ThreadRequest{
 			Messages: []ai.ThreadMessage{{
-				Role:     ai.ThreadMessageRole("user"),
-				Content:  req.Message,
-				Metadata: map[string]any{"model": req.GptModel},
+				Role:    ai.ThreadMessageRole("user"),
+				Content: req.Message,
 			}}})
 		if err != nil {
 			util.Error(c, 500, "会话创建失败", err)
@@ -105,9 +104,8 @@ func Gpt(c *gin.Context) {
 
 		// 将用户的消息添加到会话里
 		if _, err := cli.CreateMessage(util.Timeout(30), req.ThreadID, ai.MessageRequest{
-			Role:     "user",
-			Content:  req.Message,
-			Metadata: map[string]any{"model": req.GptModel},
+			Role:    "user",
+			Content: req.Message,
 		}); err != nil {
 			util.Error(c, 500, "无法将你的消息添加到会话", err)
 			return
@@ -116,12 +114,11 @@ func Gpt(c *gin.Context) {
 	}
 
 	// 根据用户的请求读取AssistantID
-	asst := ai.RunRequest{AssistantID: co.Config.AssistantID.Gpt3}
+	asst := ai.RunRequest{AssistantID: co.Config.AsstID["GPT3.5"]}
 	if req.GptModel == "HELPER" {
-		asst.AssistantID = co.Config.AssistantID.Axo
-	}
-	if req.GptModel == "GPT4" || req.GptModel == "HRLPER4" {
-		asst.Model = "gpt-4-turbo"
+		asst.AssistantID = co.Config.AsstID["HELPER"]
+	} else if req.GptModel == "GPT4" {
+		asst.AssistantID = co.Config.AsstID["GPT4"]
 	}
 
 	// 生成回答
@@ -224,7 +221,7 @@ func GptUtil(c *gin.Context) {
 }
 
 // 对run对象进行轮询检测判断执行状态
-func PollRunStatus(cli *ai.Client, threadID, runID string) ([]GptMessage, error) {
+func PollRunStatus(cli *ai.Client, threadID, runID string) (mes []GptMessage, err error) {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
@@ -259,9 +256,18 @@ func FetchMessages(cli *ai.Client, threadID string) (destination []GptMessage, e
 			MessageID: value.ID,
 			Role:      value.Role,
 			Time:      time.Now(),
-			GptModel:  value.Metadata["model"],
+			GptModel:  DetectGptModel(util.Deref(value.AssistantID)),
 			Content:   value.Content[0].Text.Value,
 		})
 	}
 	return
+}
+
+func DetectGptModel(asstid string) string {
+	for key, value := range co.Config.AsstID {
+		if asstid == value {
+			return key
+		}
+	}
+	return ""
 }

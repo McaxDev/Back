@@ -35,7 +35,6 @@ func Backend() {
 	r.GET("/prompt", h.Prompt)
 	r.GET("/source", h.GetText)
 	r.GET("/srvinfo", h.SrvInfo)
-	r.GET("/avatar", h.GetAvatar)
 	r.GET("/getmail", h.Mailauth)
 
 	// 对POST请求检查内容类型application/json的路由逻辑
@@ -45,6 +44,7 @@ func Backend() {
 
 	// 内容为json而且要求jwt的请求的路由逻辑
 	jsonjwtr := jsonr.Group("/", h.AuthJwt)
+	jsonjwtr.GET("/autologin", h.AutoLogin)
 	jsonjwtr.GET("/gptutil", h.GptUtil)
 	jsonjwtr.POST("/gpt", h.Gpt)
 
