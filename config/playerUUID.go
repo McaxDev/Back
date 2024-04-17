@@ -14,7 +14,7 @@ type playerUUID struct {
 }
 
 func CachePlayerUUID(server string) {
-	usercache := filepath.Join(SrvConf["path"][server], "usercache.json")
+	usercache := filepath.Join(Config.Server["path"][server], "usercache.json")
 	data, err := os.ReadFile(usercache)
 	if err != nil {
 		SysLog("ERROR", err.Error())

@@ -20,8 +20,6 @@ type ConfigTemplate struct {
 	AsstID map[string]string
 }
 
-var SrvConf = make(map[string]map[string]string)
-
 var Config = ConfigTemplate{
 	McFont:    "/usr/share/fonts/opentype/axo/mc.ttf",
 	Sql:       "backend:backend@tcp(localhost:3306)/backend?charset=utf8mb4&parseTime=True&loc=Local",
