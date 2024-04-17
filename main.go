@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/McaxDev/Back/command"
 	co "github.com/McaxDev/Back/config"
 	"github.com/gin-gonic/gin"
 )
@@ -38,5 +37,5 @@ func main() {
 	go Cron()
 
 	//监听命令输入
-	command.Ishell()
+	Ishell()
 }

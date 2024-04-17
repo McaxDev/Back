@@ -1,9 +1,18 @@
-package command
+package main
 
 import (
+	co "github.com/McaxDev/Back/config"
 	"github.com/abiosoft/ishell"
 	"github.com/gin-gonic/gin"
 )
+
+// 启动监听命令的的函数
+func Ishell() {
+	shell := ishell.New()
+	shell.AddCmd(&ginCmd)
+	shell.AddCmd(&loadConfCmd)
+	shell.Run()
+}
 
 var ginCmd = ishell.Cmd{
 	Name: "ginmode",
@@ -24,5 +33,14 @@ var ginCmd = ishell.Cmd{
 		default:
 			c.Println("无效的模式，可用模式：debug, release, test")
 		}
+	},
+}
+
+var loadConfCmd = ishell.Cmd{
+	Name: "reload",
+	Help: "重新加载配置文件",
+	Func: func(c *ishell.Context) {
+		co.LoadConfig()
+		c.Println("配置文件已重载完成")
 	},
 }
