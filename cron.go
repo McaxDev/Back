@@ -16,7 +16,7 @@ func Cron() {
 	c := cron.New(cron.WithSeconds())
 
 	// 添加每小时发金币的定时任务
-	_, err := c.AddFunc("0 * * * *", func() {
+	_, err := c.AddFunc("0 0 * * * *", func() {
 		mes, err := ut.Rcon("main", "money give @a 1000")
 		if err != nil {
 			co.SysLog("ERROR", err.Error())
@@ -25,12 +25,12 @@ func Cron() {
 		}
 	})
 	if err != nil {
-		co.SysLog("ERROR", "发金币的定时任务添加失败")
+		co.SysLog("ERROR", "发金币的定时任务添加失败"+err.Error())
 		return
 	}
 
 	// 添加每日重置PearlCoin的定时任务
-	_, err = c.AddFunc("0 0 * * *", func() {
+	_, err = c.AddFunc("0 0 0 * * *", func() {
 		err := co.DB.Model(&co.AxolotlCoin{}).Updates(map[string]interface{}{"Pearl": 50}).Error
 		if err != nil {
 			co.SysLog("ERROR", err.Error())
@@ -44,9 +44,9 @@ func Cron() {
 	}
 
 	// 添加自动清理内存的定时任务
-	_, err = c.AddFunc("*/10 * * * *", ut.ClearExpDefault(h.Challenges))
-	_, err = c.AddFunc("*/10 * * * *", ut.ClearExpDefault(h.IpTimeMap))
-	_, err = c.AddFunc("*/10 * * * *", ut.ClearExpired(h.Mailsent, func(s h.MailStruct) time.Time {
+	_, err = c.AddFunc("0 */10 * * * *", ut.ClearExpDefault(h.Challenges))
+	_, err = c.AddFunc("0 */10 * * * *", ut.ClearExpDefault(h.IpTimeMap))
+	_, err = c.AddFunc("0 */10 * * * *", ut.ClearExpired(h.Mailsent, func(s h.MailStruct) time.Time {
 		return s.Expiry
 	}))
 	if err != nil {

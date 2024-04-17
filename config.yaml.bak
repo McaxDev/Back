@@ -1,0 +1,24 @@
+rconpwd: ""
+gpttoken: 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
+jwtkey: "5201314"
+mcfont: /usr/share/fonts/opentype/axo/mc.ttf
+sql: backend:cb8b318b@tcp(192.168.50.38:3306)/userlist?charset=utf8mb4&parsetime=true&loc=local
+serverip: 192.168.50.38
+backport: "1314"
+avatarpath: ""
+ports:
+    main: "25565"
+    sc: "25566"
+    mod: "25564"
+serverpath:
+    main: /srv/main/
+    sc: /srv/sc/
+    mod: /srv/mod/
+smtpconfig:
+    srv: smtp.163.com
+    port: 25
+    mail: axolotland@163.com
+    pwd: FLWEBLGJBWCTAFMV
+assistantid:
+    gpt3: "asst_0WHu1eoqK46RS7zhbUiH8qJH"
+    axo: "asst_9JihcpPzjvmArT9mEIZfU5Nj"

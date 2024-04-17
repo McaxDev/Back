@@ -29,12 +29,8 @@ func LogToSQL(c *gin.Context) {
 	duration := time.Since(startTime)
 
 	//从handler里获取错误信息
-	errString := ""
-	if UnknownErr, exist := c.Get("error"); exist {
-		if err, ok := UnknownErr.(error); ok {
-			errString = util.ErrToStr(err)
-		}
-	}
+	midErr, _ := util.ReadMid[error](c, "error")
+	errString := util.ErrToStr(midErr)
 
 	//从handler里获取用户ID
 	userID, _ := ReadJwt(c)

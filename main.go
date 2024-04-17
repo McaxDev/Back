@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	co "github.com/McaxDev/Back/config"
+	"github.com/McaxDev/Back/handler"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +32,7 @@ func main() {
 	co.DB.AutoMigrate(co.TableList...)
 
 	//启动后端
+	handler.HandlerInit()
 	go Backend()
 
 	//执行定时任务

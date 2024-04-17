@@ -3,8 +3,6 @@ package handler
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"net/url"
 	"time"
 
 	co "github.com/McaxDev/Back/config"
@@ -23,38 +21,25 @@ type GptSession struct {
 
 // 代表GPT的消息格式的结构体
 type GptMessage struct {
-	MessageID string    `json:"messageId"`
-	Role      string    `json:"role"`
-	Time      time.Time `json:"time"`
-	GptModel  string    `json:"gptModel"`
-	Content   string    `json:"content"`
+	MessageID string `json:"messageId"`
+	Role      string `json:"role"`
+	Time      string `json:"time"`
+	GptModel  string `json:"gptModel"`
+	Content   string `json:"content"`
 }
 
 // 创建GPT连接客户端
-var cli = ai.NewClient(co.Config.GptToken)
-
-// 启用clash代理
-func init() {
-	conf := ai.DefaultConfig(co.Config.GptToken)
-	proxyurl, err := url.Parse(co.Config.ProxyAddr)
-	if err != nil {
-		co.SysLog("ERROR", "GPT网络代理启动失败")
-		return
-	}
-	transport := &http.Transport{Proxy: http.ProxyURL(proxyurl)}
-	conf.HTTPClient = &http.Client{Transport: transport}
-	cli = ai.NewClientWithConfig(conf)
-}
+var cli *ai.Client
 
 // 向GPT提问的handler
 func Gpt(c *gin.Context) {
 
 	// 从请求体获得数据
-	var req = struct {
+	var req struct {
 		ThreadID string `json:"sessionId"`
 		GptModel string `json:"gptModel"`
 		Message  string `json:"message"`
-	}{GptModel: "GPT3.5"}
+	}
 	if err := util.BindReq(c, &req); err != nil {
 		util.Error(c, 400, "你的请求体格式不正确", err)
 		return
@@ -236,7 +221,7 @@ func GptUtil(c *gin.Context) {
 
 // 对run对象进行轮询检测判断执行状态
 func PollRunStatus(cli *ai.Client, threadID, runID string) (mes []GptMessage, err error) {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -274,7 +259,7 @@ func FetchMessages(cli *ai.Client, threadID string) (destination []GptMessage, e
 		destination = append(destination, GptMessage{
 			MessageID: value.ID,
 			Role:      value.Role,
-			Time:      time.Now(),
+			Time:      time.Now().Format("2006-01-02 15:04:05"),
 			GptModel:  DetectGptModel(util.Deref(value.AssistantID)),
 			Content:   value.Content[0].Text.Value,
 		})
