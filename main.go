@@ -7,7 +7,6 @@ import (
 
 	"github.com/McaxDev/Back/command"
 	co "github.com/McaxDev/Back/config"
-	"github.com/McaxDev/Back/routine"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,11 +32,10 @@ func main() {
 	co.DB.AutoMigrate(co.TableList...)
 
 	//启动后端
-	go routine.Backend()
+	go Backend()
 
 	//执行定时任务
-	go routine.Schedule(10, routine.ScheduleList...)
-	go routine.DailyTask()
+	go Cron()
 
 	//监听命令输入
 	command.Ishell()
