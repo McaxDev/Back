@@ -8,6 +8,7 @@ type ConfigTemplate struct {
 	Sql        string
 	ServerIP   string
 	BackPort   string
+	TcpPort    string
 	AvatarPath string
 	ProxyAddr  string
 	ServerPort map[string]int
@@ -49,4 +50,17 @@ var Config = ConfigTemplate{
 		"mail":     "axolotland@163.com",
 		"password": "",
 	},
+}
+
+type SrvInfoTemplate struct {
+	MainVer  string
+	ScVer    string
+	ModVer   string
+	Salt     string
+	AllowCmd []string
+}
+
+var SrvInfo = SrvInfoTemplate{
+	AllowCmd: []string{"list", "say", "tell", "me"},
+	Salt:     "Axolotland Gaming Club",
 }

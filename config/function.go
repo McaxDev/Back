@@ -47,15 +47,6 @@ func Read(config interface{}, path string) error {
 	return unmarshalFunc(data, config)
 }
 
-func LoadConfig() {
-	if err := Read(&Config, "config.yaml"); err != nil {
-		log.Fatalf("重新加载配置文件失败：%v", err)
-	}
-	if err := Read(&SrvInfo, "srvinfo.json"); err != nil {
-		log.Fatalf("重新加载信息文件失败：%v", err)
-	}
-}
-
 // 将系统日志输出到控制台和数据库
 func SysLog(level string, mes string) {
 

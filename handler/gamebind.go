@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"time"
 
 	co "github.com/McaxDev/Back/config"
@@ -9,41 +8,67 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 存储绑定验证码的哈希表
+var bindcodes = make(map[string]bindStruct)
+
+// 上面哈希表的键值对的值
 type bindStruct struct {
 	Gamename string
 	Expire   time.Time
 }
 
-var bindcodes = make(map[string]bindStruct)
-
+// 接收游戏服务器的绑定请求，并发送验证码
 func GameBindCode(c *gin.Context) {
-	srv, gamename := c.PostForm("server"), c.PostForm("gamename")
+
+	// 将请求体绑定到结构体对象
+	gamename := c.Query("gamename")
+
+	// 生成用于绑定验证的验证码，并存储到哈希表
 	bindcode := util.RandStr(6)
 	bindcodes[bindcode] = bindStruct{
 		Gamename: gamename,
-		Expire:   time.Now().Add(10 * time.Minute),
+		Expire:   time.Now().Add(time.Minute),
 	}
-	command := fmt.Sprintf("tell %s 你的验证码是 %s", gamename, bindcode)
-	_, err := util.Rcon(srv, command)
-	if err != nil {
-		util.Error(c, 500, "验证码无法送达MC服务器", err)
-		return
-	}
-	util.Info(c, 200, "验证码已送达MC服务器，十分钟内有效", nil)
+
+	// 将绑定码返回给Minecraft服务器
+	util.Info(c, 200, "验证码发送成功，请于10分钟内使用", bindcode)
 }
 
+// 验证绑定的handler
 func AuthBindCode(c *gin.Context) {
-	authcode := c.PostForm("authcode")
-	authObj, exist := bindcodes[authcode]
-	if !exist || time.Now().After(authObj.Expire) {
-		util.Error(c, 400, "验证码无效或已过期", nil)
-		return
-	}
-	username, _ := ReadJwt(c)
-	err := co.DB.Model(&co.User{}).Where("username = ?", username).Update("gamename", authObj.Gamename).Error
+
+	// 从jwt里获取用户ID
+	userID, err := ReadJwt(c)
 	if err != nil {
-		util.Error(c, 500, "数据库查询用户失败", err)
+		util.Error(c, 500, "读取用户信息失败", err)
 		return
 	}
-	util.Info(c, 200, "你账号绑定的玩家已更新", nil)
+
+	// 检查用户是否已经通过验证
+	var user co.User
+	if err := co.DB.First(&user, "user_id = ?", userID).Error; err != nil {
+		util.DbQueryError(c, err, "无法找到这个用户")
+		return
+	}
+	if user.GameAuth {
+		util.Error(c, 400, "这个用户已经认证过了", err)
+		return
+	}
+
+	// 从用户的请求里获取验证码
+	authcode := c.Query("authcode")
+
+	// 检查绑定验证码是否存在或对应
+	bindStru, exist := bindcodes[authcode]
+	if !exist || bindStru.Expire.Before(time.Now()) {
+		util.Error(c, 400, "验证码无效或过期", nil)
+		return
+	}
+
+	// 完成绑定
+	if err := co.DB.Model(&user).Update("GameAuth", true).Error; err != nil {
+		util.Error(c, 500, "绑定失败，系统错误", err)
+		return
+	}
+	util.Info(c, 200, "绑定成功", nil)
 }

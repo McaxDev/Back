@@ -40,7 +40,7 @@ var loadConfCmd = ishell.Cmd{
 	Name: "reload",
 	Help: "重新加载配置文件",
 	Func: func(c *ishell.Context) {
-		co.LoadConfig()
+		co.ConfigInit()
 		c.Println("配置文件已重载完成")
 	},
 }

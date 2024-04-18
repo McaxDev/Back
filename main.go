@@ -25,11 +25,7 @@ func main() {
 	}
 
 	//初始化配置文件，自动迁移数据库表
-	co.LoadConfig()
-	if err := co.ReadDB(); err != nil {
-		log.Fatal("读取数据库失败：", err)
-	}
-	co.DB.AutoMigrate(co.TableList...)
+	co.ConfigInit()
 
 	//启动后端
 	handler.HandlerInit()
