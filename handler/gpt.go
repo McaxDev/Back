@@ -52,6 +52,22 @@ func Gpt(c *gin.Context) {
 		return
 	}
 
+	// 根据用户的请求读取AssistantID
+	asst := ai.RunRequest{AssistantID: co.Config.AsstID["GPT3.5"]}
+	cost := 1
+	if req.GptModel == "HELPER" {
+		asst.AssistantID = co.Config.AsstID["HELPER"]
+	} else if req.GptModel == "GPT4" {
+		asst.AssistantID = co.Config.AsstID["GPT4"]
+		cost = 2
+	}
+
+	// 检查用户的钱够不够并扣钱
+	if err := util.Charge(userID, cost); err != nil {
+		util.Error(c, 400, "扣费失败", err)
+		return
+	}
+
 	if req.ThreadID == "" { // 创建新的会话
 
 		// 创建一个等待会话超时的上下文
@@ -106,14 +122,6 @@ func Gpt(c *gin.Context) {
 			return
 		}
 
-	}
-
-	// 根据用户的请求读取AssistantID
-	asst := ai.RunRequest{AssistantID: co.Config.AsstID["GPT3.5"]}
-	if req.GptModel == "HELPER" {
-		asst.AssistantID = co.Config.AsstID["HELPER"]
-	} else if req.GptModel == "GPT4" {
-		asst.AssistantID = co.Config.AsstID["GPT4"]
 	}
 
 	// 创建一个等待会话超时的上下文

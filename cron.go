@@ -44,11 +44,10 @@ func Cron() {
 	}
 
 	// 添加自动清理内存的定时任务
-	_, err = c.AddFunc("0 */10 * * * *", ut.ClearExpDefault(h.Challenges))
-	_, err = c.AddFunc("0 */10 * * * *", ut.ClearExpDefault(h.IpTimeMap))
-	_, err = c.AddFunc("0 */10 * * * *", ut.ClearExpired(h.Mailsent, func(s h.MailStruct) time.Time {
-		return s.Expiry
-	}))
+	_, err = c.AddFunc("0 */10 * * * *", func() {
+		ut.ClearExpDefault(h.Challenges, h.IpTimeMap)
+		ut.ClearExpired(func(s h.MailStruct) time.Time { return s.Expiry }, h.Mailsent)
+	})
 	if err != nil {
 		co.SysLog("ERROR", "添加自动清理内存的定时任务失败")
 	}

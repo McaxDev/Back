@@ -7,7 +7,7 @@ import (
 )
 
 // 加载东八区时区
-func init() {
+func UtilInit() {
 	var err error
 	Loc, err = time.LoadLocation("Asia/Shanghai")
 	if err != nil {

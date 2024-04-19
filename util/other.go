@@ -25,9 +25,9 @@ func MapReadResp(res *http.Response) (gin.H, error) {
 }
 
 // 清理过期的键值对的值
-func ClearExpired[K comparable, V any](themap map[K]V, timePos func(V) time.Time) func() {
-	return func() {
-		now := time.Now()
+func ClearExpired[K comparable, V any](timePos func(V) time.Time, maps ...map[K]V) {
+	now := time.Now()
+	for _, themap := range maps {
 		for key, value := range themap {
 			if now.After(timePos(value)) {
 				delete(themap, key)
@@ -37,8 +37,8 @@ func ClearExpired[K comparable, V any](themap map[K]V, timePos func(V) time.Time
 }
 
 // 清理过期键值对，但是值是time.Time类型
-func ClearExpDefault[K comparable](themap map[K]time.Time) func() {
-	return ClearExpired(themap, func(t time.Time) time.Time { return t })
+func ClearExpDefault[K comparable](themap ...map[K]time.Time) {
+	ClearExpired(func(t time.Time) time.Time { return t }, themap...)
 }
 
 // 将请求体读取到结构体
