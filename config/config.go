@@ -1,21 +1,26 @@
 package config
 
 type ConfigTemplate struct {
-	RconPwd    string
-	GptToken   string
-	JwtKey     string
-	McFont     string
-	Sql        string
-	ServerIP   string
-	BackPort   string
-	TcpPort    string
-	AvatarPath string
-	ProxyAddr  string
-	ServerPort map[string]int
-	RconPort   map[string]int
-	ServerPath map[string]string
-	AsstID     map[string]string
-	SMTPConfig map[string]string
+	RconPwd       string
+	GptToken      string
+	JwtKey        string
+	McFont        string
+	Sql           string
+	ServerIP      string
+	BackPort      string
+	TcpPort       string
+	AvatarPath    string
+	ProxyAddr     string
+	ServerPort    map[string]int
+	RconPort      map[string]int
+	ServerPath    map[string]string
+	AsstID        map[string]string
+	SMTPConfig    map[string]string
+	SSL           map[string]string
+	MySQL         map[string]string
+	Redis         map[string]string
+	RedisMap      map[string]string
+	ImmediateExit bool
 }
 
 var Config = ConfigTemplate{
@@ -50,6 +55,23 @@ var Config = ConfigTemplate{
 		"mail":     "axolotland@163.com",
 		"password": "",
 	},
+	SSL: map[string]string{
+		"pem": "/etc/ssl/certs/axtl.cn.pem",
+		"key": "/etc/ssl/private/axtl.cn.key",
+	},
+	MySQL: map[string]string{
+		"username": "root",
+		"password": "",
+		"host":     "localhost",
+		"port":     "3306",
+		"database": "",
+	},
+	Redis: map[string]string{
+		"password": "",
+		"host":     "localhost",
+		"DB":       "0",
+	},
+	ImmediateExit: true,
 }
 
 type SrvInfoTemplate struct {

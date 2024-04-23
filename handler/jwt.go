@@ -72,6 +72,29 @@ func ReadJwt(c *gin.Context) (uint, error) {
 	return uint(userID), nil
 }
 
+// 通过请求里的jwt将用户数据绑定到结构体对象
+func BindJwt(c *gin.Context, preloads ...string) (*co.User, error) {
+
+	// 从请求里读取用户ID
+	userID, err := ReadJwt(c)
+	if err != nil {
+		return nil, err
+	}
+
+	// 根据用户ID在数据库里查找用户并返回
+	var user co.User
+	result := co.DB.First(&user, "user_id = ?", userID)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	//预加载从表的数据并返回
+	for _, preload := range preloads {
+		result = result.Preload(preload)
+	}
+	return &user, nil
+}
+
 // 对生成jwt进行签名的函数
 func keyFunc(token *jwt.Token) (any, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

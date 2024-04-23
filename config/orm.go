@@ -42,14 +42,17 @@ type User struct {
 	ID        uint `gorm:"column:user_id;primaryKey;auto_increment;type:uint" json:"uid"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Username  string `gorm:"column:user_name;unique_index;size:255;not null" json:"username"`
-	Admin     bool   `gorm:"column:admin" json:"admin"`
-	Avatar    string `gorm:"column:head" json:"avatar"`
-	Password  string `gorm:"column:user_pas" json:"status"`
-	Gamename  string `gorm:"column:game_name;size:30;not null" json:"gamename"`
-	Telephone string `gorm:"column:telephone;size:20" json:"telephone"`
-	Email     string `gorm:"column:email;size:50" json:"email"`
-	GameAuth  bool   `gorm:"column:game_auth" json:"gameauth"`
+	Username  string      `gorm:"column:user_name;unique_index;size:255;not null" json:"username"`
+	Admin     bool        `gorm:"column:admin" json:"admin"`
+	Avatar    string      `gorm:"column:head" json:"avatar"`
+	Password  string      `gorm:"column:user_pas" json:"status"`
+	Gamename  string      `gorm:"column:game_name;size:30;not null" json:"gamename"`
+	Telephone string      `gorm:"column:telephone;size:20" json:"telephone"`
+	Email     string      `gorm:"column:email;size:50" json:"email"`
+	GameAuth  bool        `gorm:"column:game_auth" json:"gameauth"`
+	Nonce     string      `gorm:"column:nonce" json:"nonce"`
+	Balance   AxolotlCoin `gorm:"foreignKey:UserID;references:ID"`
+	Thread    []GptThread `gorm:"foreignKey:UserID;references:ID"`
 }
 
 func (User) TableName() string {
@@ -59,12 +62,12 @@ func (User) TableName() string {
 // 记录玩家的币
 type AxolotlCoin struct {
 	gorm.Model
-	User   User `gorm:"foreignKey:UserID;references:ID"`
-	UserID uint `gorm:"column:user_id;type:uint"`
+	UserID uint `gorm:"column:user_id;type:uint;uniqueIndex"`
 	Pearl  int  `gorm:"column:pearl_axolotl_coin;default:50"`
 	Azure  int  `gorm:"column:azure_axolotl_coin;default:0"`
 }
 
+// 为结构体指定在数据库对应的名称
 func (AxolotlCoin) TableName() string {
 	return "axolotl_coin"
 }
@@ -111,7 +114,6 @@ type GptThread struct {
 	ThreadID   string
 	ThreadName string
 	UserID     uint `gorm:"column:user_id;type:uint"`
-	User       User `gorm:"foreignKey:UserID;references:ID"`
 }
 
 // 记录TCP连接与客户端发送的消息的结构体

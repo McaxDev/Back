@@ -46,7 +46,7 @@ func Gpt(c *gin.Context) {
 	}
 
 	// 从JWT里获取用户ID
-	userID, err := ReadJwt(c)
+	user, err := BindJwt(c, "Balance")
 	if err != nil {
 		util.Error(c, 500, "无法读取你的用户信息", err)
 		return
@@ -54,16 +54,16 @@ func Gpt(c *gin.Context) {
 
 	// 根据用户的请求读取AssistantID
 	asst := ai.RunRequest{AssistantID: co.Config.AsstID["GPT3.5"]}
-	cost := 1
+	cost := -1
 	if req.GptModel == "HELPER" {
 		asst.AssistantID = co.Config.AsstID["HELPER"]
 	} else if req.GptModel == "GPT4" {
 		asst.AssistantID = co.Config.AsstID["GPT4"]
-		cost = 2
+		cost = -2
 	}
 
 	// 检查用户的钱够不够并扣钱
-	if err := util.Charge(userID, cost); err != nil {
+	if err := user.Transact(cost); err != nil {
 		util.Error(c, 400, "扣费失败", err)
 		return
 	}
@@ -89,12 +89,11 @@ func Gpt(c *gin.Context) {
 		req.ThreadID = thread.ID
 
 		// 将用户的会话信息存储到数据库
-		threadData := co.GptThread{
+		if err := co.DB.Create(&co.GptThread{
 			ThreadID:   thread.ID,
 			ThreadName: time.Now().Format("2006-01-02 15:04:05"),
-			UserID:     userID,
-		}
-		if err := co.DB.Create(&threadData).Error; err != nil {
+			UserID:     user.ID,
+		}).Error; err != nil {
 			util.DbQueryError(c, err, "无法将你的会话信息存储到数据库")
 			return
 		}
@@ -102,8 +101,7 @@ func Gpt(c *gin.Context) {
 	} else { // 使用已有的会话
 
 		// 检查用户是否拥有这个会话
-		var tmp co.GptThread
-		result := co.DB.First(&tmp, "user_id = ? AND thread_id = ?", userID, req.ThreadID)
+		result := co.DB.First(&co.GptThread{}, "user_id = ? AND thread_id = ?", user.ID, req.ThreadID)
 		if err := result.Error; err != nil {
 			util.Error(c, 400, "你没有这个会话", err)
 			return
@@ -142,16 +140,10 @@ func Gpt(c *gin.Context) {
 		return
 	}
 
-	// 查找用户ID对应的用户名
-	var tmp co.User
-	if err := co.DB.First(&tmp, "user_id = ?", userID).Error; err != nil {
-		util.Error(c, 500, "查询用户信息失败", err)
-	}
-
 	// 将回答返回给用户
 	util.Info(c, 200, "执行成功", GptSession{
-		UserID:    userID,
-		Username:  tmp.Username,
+		UserID:    user.ID,
+		Username:  user.Username,
 		SessionID: req.ThreadID,
 		Message:   mes,
 	})
@@ -164,25 +156,17 @@ func GptUtil(c *gin.Context) {
 	threadID, threadName, action := c.Query("session_id"), c.Query("session_name"), c.Query("action")
 
 	// 从JWT里获取用户ID
-	userID, err := ReadJwt(c)
+	user, err := BindJwt(c, "Thread")
 	if err != nil {
 		util.Error(c, 500, "读取用户JWT信息失败", err)
 		return
 	}
 
-	var tmp co.GptThread
 	if threadID == "" { // 如果会话ID为空，就返回这个用户的所有会话
-
-		// 将用户的所有会话读取并存储到切片里
-		var threads []co.GptThread
-		if err := co.DB.Find(&threads, "user_id = ?", userID).Error; err != nil {
-			util.Error(c, 500, "无法查找你的所有会话", err)
-			return
-		}
 
 		// 将切片里的所有会话映射到结构体里
 		var results []map[string]any
-		for _, thread := range threads {
+		for _, thread := range user.Thread {
 			results = append(results, map[string]any{
 				"session_id":   thread.ThreadID,
 				"session_name": thread.ThreadName,
@@ -194,7 +178,8 @@ func GptUtil(c *gin.Context) {
 	} else { // 如果会话ID不为空，进行删除会话或修改会话名或列出消息
 
 		// 检查用户是否拥有这个会话
-		err = co.DB.First(&tmp, "thread_id = ? AND user_id = ?", threadID, userID).Error
+		var tmp co.GptThread
+		err = co.DB.First(&tmp, "thread_id = ? AND user_id = ?", threadID, user.ID).Error
 		if err != nil {
 			util.DbQueryError(c, err, "你没有这个会话")
 			return
@@ -229,7 +214,7 @@ func GptUtil(c *gin.Context) {
 
 // 对run对象进行轮询检测判断执行状态
 func PollRunStatus(cli *ai.Client, threadID, runID string) (mes []GptMessage, err error) {
-	ticker := time.NewTicker(3 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
 	for {

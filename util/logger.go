@@ -5,13 +5,20 @@ import (
 	"gorm.io/gorm"
 )
 
+// 向客户端发送错误
 func Error(c *gin.Context, status int, msg string, err error) {
 	c.Set("error", err)
-	c.AbortWithStatusJSON(status, gin.H{"msg": msg, "data": nil})
+	c.AbortWithStatusJSON(status, Resp(msg, nil))
 }
 
+// 向客户端发送正常信息
 func Info(c *gin.Context, status int, msg string, data any) {
-	c.AbortWithStatusJSON(status, gin.H{"msg": msg, "data": data})
+	c.AbortWithStatusJSON(status, Resp(msg, data))
+}
+
+// 构造响应格式的映射
+func Resp(msg string, data any) gin.H {
+	return gin.H{"msg": msg, "data": data}
 }
 
 func ErrToStr(err error) string {

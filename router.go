@@ -45,7 +45,13 @@ func Backend() {
 	// 内容为json而且要求jwt的请求的路由逻辑
 	jsonjwtr := jsonr.Group("/", h.AuthJwt)
 	jsonjwtr.GET("/autologin", h.AutoLogin)
+	jsonjwtr.GET("/coin", h.Coin)
 	jsonjwtr.GET("/gptutil", h.GptUtil)
+	jsonjwtr.GET("/playerdata", h.PlayerData)
+	jsonjwtr.GET("/change/username", h.ChangeUsername)
+	jsonjwtr.GET("/change/gamename", h.ChangeGamename)
+	jsonjwtr.POST("/change/password", h.ChangePwd)
+	jsonjwtr.POST("/change/email", h.ChangeMail)
 	jsonjwtr.POST("/gpt", h.Gpt)
 
 	// 内容为json而且要求jwt而且要求人机验证的路由逻辑
@@ -56,7 +62,7 @@ func Backend() {
 	jsonjwtcapr.POST("/gamebind", h.AuthBindCode)
 
 	//启动后端
-	r.Run(":" + co.Config.BackPort)
+	r.RunTLS(":"+co.Config.BackPort, co.Config.SSL["pem"], co.Config.SSL["key"])
 }
 
 // 创建检查内容类型中间件的工厂函数

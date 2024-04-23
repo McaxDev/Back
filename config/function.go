@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bufio"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -65,4 +66,14 @@ func SysLog(level string, mes string) {
 		log.Fatal(logprinted)
 	}
 	fmt.Println(logprinted)
+}
+
+// 针对Windows系统的程序结束不立即退出
+func WaitOnExit() {
+	if err := recover(); err != nil {
+		fmt.Println("捕获到错误:", err)
+	}
+	// 程序结束前等待用户输入
+	fmt.Println("按任意键继续...")
+	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }

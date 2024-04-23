@@ -17,3 +17,10 @@ func Contain[T comparable](slice []T, val T) bool {
 	}
 	return false
 }
+
+// 通过循环让一个函数先后传入多个参数并执行
+func Loop[T any](callback func(T), argu ...T) {
+	for _, value := range argu {
+		callback(value)
+	}
+}
