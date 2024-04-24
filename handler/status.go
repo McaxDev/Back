@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/McaxDev/Back/util"
 	"github.com/gin-gonic/gin"
+	"github.com/mcstatus-io/mcutil/v3"
 )
 
 // 查询服务器状态的handler
@@ -12,7 +13,7 @@ func Status(c *gin.Context) {
 	server := c.Query("server")
 
 	// 执行查询操作
-	resp, err := util.Status(server)
+	resp, err := util.Status(server, mcutil.FullQuery)
 	if err != nil {
 		util.Error(c, 500, "查询服务器信息失败", err)
 		return

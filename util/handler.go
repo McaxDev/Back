@@ -10,10 +10,9 @@ import (
 )
 
 // 根据用户ID查询用户信息的函数
-func GetUserInfo(userid uint) (user co.User, err error) {
-	err = co.DB.First(&user, "user_id = ?", userid).Error
+func GetUserInfo(user *co.User) *co.User {
 	user.Password = "success"
-	return
+	return user
 }
 
 // 从中间件读取变量的函数

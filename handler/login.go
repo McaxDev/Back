@@ -22,7 +22,9 @@ func Login(c *gin.Context) {
 
 	//从数据库里检查这个用户是否存在
 	var tmp co.User
-	if err := co.DB.First(&tmp, "user_name = ?", req.Username).Error; err != nil {
+	if err := co.DB.First(
+		&tmp, "user_name = ?", req.Username,
+	).Error; err != nil {
 		util.DbQueryError(c, err, "该用户不存在")
 		return
 	}

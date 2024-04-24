@@ -16,16 +16,15 @@ func ChangeGamename(c *gin.Context) {
 		return
 	}
 
-	// 从请求头获取游戏名
-	gamename := c.Query("gamename")
-
 	// 保存游戏名到数据库
-	result := co.DB.Model(user).Updates(gin.H{"Gamename": gamename, "GameAuth": false})
-	if err := result.Error; err != nil {
-		util.Error(c, 500, "修改游戏名不正确", err)
+	if err := co.DB.Model(user).Updates(gin.H{
+		"Gamename": c.Query("gamename"),
+		"GameAuth": false,
+	}).Error; err != nil {
+		util.Error(c, 500, "修改游戏名失败", err)
 		return
 	}
 
 	// 返回应答
-	util.Info(c, 200, "修改游戏名正确，请前往验证", nil)
+	util.Info(c, 200, "修改游戏名成功，请前往验证", nil)
 }

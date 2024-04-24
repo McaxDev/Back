@@ -71,7 +71,7 @@ func Gpt(c *gin.Context) {
 	if req.ThreadID == "" { // 创建新的会话
 
 		// 创建一个等待会话超时的上下文
-		ctx, canc := util.Timeout(30)
+		ctx, canc := context.WithTimeout(context.Background(), 5*time.Second)
 		defer canc()
 
 		// 创建会话
@@ -101,14 +101,15 @@ func Gpt(c *gin.Context) {
 	} else { // 使用已有的会话
 
 		// 检查用户是否拥有这个会话
-		result := co.DB.First(&co.GptThread{}, "user_id = ? AND thread_id = ?", user.ID, req.ThreadID)
-		if err := result.Error; err != nil {
+		if err := co.DB.First(
+			&co.GptThread{}, "user_id = ? AND thread_id = ?", user.ID, req.ThreadID,
+		).Error; err != nil {
 			util.Error(c, 400, "你没有这个会话", err)
 			return
 		}
 
 		// 创建一个等待会话超时的上下文
-		ctx, canc := util.Timeout(30)
+		ctx, canc := context.WithTimeout(context.Background(), 5*time.Second)
 		defer canc()
 
 		// 将用户的消息添加到会话里
@@ -123,7 +124,7 @@ func Gpt(c *gin.Context) {
 	}
 
 	// 创建一个等待会话超时的上下文
-	ctx, canc := util.Timeout(30)
+	ctx, canc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer canc()
 
 	// 生成回答
@@ -153,7 +154,9 @@ func Gpt(c *gin.Context) {
 func GptUtil(c *gin.Context) {
 
 	// 从用户的请求体里获得查询字符串参数
-	threadID, threadName, action := c.Query("session_id"), c.Query("session_name"), c.Query("action")
+	threadID := c.Query("session_id")
+	threadName := c.Query("session_name")
+	action := c.Query("action")
 
 	// 从JWT里获取用户ID
 	user, err := BindJwt(c, "Thread")
@@ -179,23 +182,26 @@ func GptUtil(c *gin.Context) {
 
 		// 检查用户是否拥有这个会话
 		var tmp co.GptThread
-		err = co.DB.First(&tmp, "thread_id = ? AND user_id = ?", threadID, user.ID).Error
-		if err != nil {
+		if err = co.DB.First(
+			&tmp, "thread_id = ? AND user_id = ?", threadID, user.ID,
+		).Error; err != nil {
 			util.DbQueryError(c, err, "你没有这个会话")
 			return
 		}
 
 		if action == "delete" { // 如果行为等于删除，删除会话
-			result := co.DB.Delete(&tmp, "thread_id = ?", threadID)
-			if err := result.Error; err != nil {
+			if err := co.DB.Delete(
+				&tmp, "thread_id = ?", threadID,
+			).Error; err != nil {
 				util.Error(c, 500, "无法删除这个会话", err)
 				return
 			}
 			util.Info(c, 200, "会话删除成功", nil)
 
 		} else if threadName != "" { // 如果会话名称不为空，修改会话名称
-			result := co.DB.Model(&tmp).Update("thread_name", threadName)
-			if err := result.Error; err != nil {
+			if err := co.DB.Model(&tmp).Update(
+				"thread_name", threadName,
+			).Error; err != nil {
 				util.Error(c, 500, "无法修改这个会话的名称", err)
 				return
 			}

@@ -17,8 +17,9 @@ func GetCaptcha(c *gin.Context) {
 	c.Header("X-Captcha-Id", id)
 
 	// 发送响应体图片
-	err := captcha.WriteImage(c.Writer, id, captcha.StdWidth, captcha.StdHeight)
-	if err != nil {
+	if err := captcha.WriteImage(
+		c.Writer, id, captcha.StdWidth, captcha.StdHeight,
+	); err != nil {
 		util.Error(c, 500, "验证码绘制失败", err)
 		return
 	}
