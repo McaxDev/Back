@@ -83,14 +83,17 @@ func BindJwt(c *gin.Context, preloads ...string) (*co.User, error) {
 
 	// 根据用户ID在数据库里查找用户并返回
 	var user co.User
-	result := co.DB.First(&user, "user_id = ?", userID)
-	if err := result.Error; err != nil {
-		return nil, err
-	}
+	var result = co.DB.Where("user_id = ?", userID)
 
 	//预加载从表的数据并返回
 	for _, preload := range preloads {
 		result = result.Preload(preload)
+	}
+	result = result.First(&user)
+
+	// 返回数据和可能的错误
+	if err := result.Error; err != nil {
+		return nil, err
 	}
 	return &user, nil
 }

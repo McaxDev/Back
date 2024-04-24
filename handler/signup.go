@@ -17,7 +17,7 @@ func Signup(c *gin.Context) {
 		Authcode string `json:"mailcode"`
 		Gamename string `json:"gamename"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := util.BindReq(c, &req); err != nil {
 		util.Error(c, 400, "无法解析请求体", err)
 		return
 	}

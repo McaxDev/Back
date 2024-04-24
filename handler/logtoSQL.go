@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"io"
 	"log"
 	"time"
@@ -17,11 +16,10 @@ func LogToSQL(c *gin.Context) {
 	// 读取请求体并复制
 	reqBody, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		co.SysLog("ERROR", err.Error())
+		util.Error(c, 500, "无法读取你的请求体", err)
 		return
 	}
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBody))
-	reqBodyStr := string(reqBody)
+	c.Set("reqBody", reqBody)
 
 	//获取请求的持续时间
 	startTime := time.Now()
@@ -45,7 +43,7 @@ func LogToSQL(c *gin.Context) {
 		Method:   c.Request.Method,
 		Path:     c.Request.URL.Path,
 		Source:   c.ClientIP(),
-		ReqBody:  reqBodyStr,
+		ReqBody:  string(reqBody),
 	}
 	if dbErr := co.DB.Create(&DBlog).Error; dbErr != nil {
 		log.Println("将日志存储到数据库失败：" + dbErr.Error())

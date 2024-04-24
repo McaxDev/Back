@@ -15,7 +15,7 @@ func Login(c *gin.Context) {
 		Password  string `json:"password"`
 		Challenge string `json:"challenge"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := util.BindReq(c, &req); err != nil {
 		util.Error(c, 400, "无法解析请求体", err)
 		return
 	}

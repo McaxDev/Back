@@ -15,21 +15,19 @@ type playerUUID struct {
 }
 
 // 将玩家名与UUID缓存到哈希表的函数
-func CachePlayerUUID(server string) {
+func CachePlayerUUID(server string) error {
 
 	// 将文件数据读取到字节切片
 	usercache := filepath.Join(co.Config.ServerPath[server], "usercache.json")
 	data, err := os.ReadFile(usercache)
 	if err != nil {
-		co.SysLog("ERROR", err.Error())
-		return
+		return err
 	}
 
 	// 将字节切片里的JSON数据反序列化到结构体切片
 	var players []playerUUID
 	if err := json.Unmarshal(data, &players); err != nil {
-		co.SysLog("ERROR", err.Error())
-		return
+		return err
 	}
 
 	// 使用循环将玩家名和玩家对应的UUID存储到双向哈希表
@@ -37,4 +35,7 @@ func CachePlayerUUID(server string) {
 		co.PlayerUUID[player.Name] = player.UUID
 		co.PlayerName[player.UUID] = player.Name
 	}
+
+	// 如果执行成功，就不返回错误
+	return nil
 }

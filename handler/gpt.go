@@ -46,7 +46,7 @@ func Gpt(c *gin.Context) {
 	}
 
 	// 从JWT里获取用户ID
-	user, err := BindJwt(c, "Balance")
+	user, err := BindJwt(c, "Balance", "Thread")
 	if err != nil {
 		util.Error(c, 500, "无法读取你的用户信息", err)
 		return

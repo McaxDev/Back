@@ -6,6 +6,7 @@ import (
 	co "github.com/McaxDev/Back/config"
 	cr "github.com/McaxDev/Back/cron"
 	h "github.com/McaxDev/Back/handler"
+	"github.com/McaxDev/Back/util"
 	ut "github.com/McaxDev/Back/util"
 	"github.com/robfig/cron/v3"
 )
@@ -27,19 +28,13 @@ func Cron() {
 		}
 
 		// 缓存玩家的UUID
-		if err := cr.CacheData("main"); err != nil {
-			co.SysLog("ERROR", "无法缓存互通服的玩家UUID"+err.Error())
-		}
-		if err := cr.CacheData("sc"); err != nil {
-			co.SysLog("ERROR", "无法缓存生电服玩家的UUID"+err.Error())
+		if err := util.ForEach(cr.CachePlayerUUID, "main", "sc"); err != nil {
+			co.SysLog("ERROR", "无法缓存玩家的UUID"+err.Error())
 		}
 
 		// 缓存玩家游戏数据
-		if err := cr.CacheData("main"); err != nil {
-			co.SysLog("ERROR", "无法缓存互通服玩家的游戏数据"+err.Error())
-		}
-		if err := cr.CacheData("sc"); err != nil {
-			co.SysLog("ERROR", "无法缓存生电服玩家的游戏数据"+err.Error())
+		if err := util.ForEach(cr.CacheData, "main", "sc"); err != nil {
+			co.SysLog("ERROR", "无法缓存玩家的游戏数据"+err.Error())
 		}
 
 	}); err != nil {
