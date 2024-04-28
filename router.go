@@ -35,7 +35,7 @@ func Backend() {
 	r.GET("/prompt", h.Prompt)
 	r.GET("/source", h.GetText)
 	r.GET("/srvinfo", h.SrvInfo)
-	r.GET("/getmail", h.Mailauth)
+	r.GET("/getmail", h.RateLimit(60), h.Mailauth)
 
 	// 对POST请求检查内容类型application/json的路由逻辑
 	jsonr := r.Group("/", conType("application/json"))
@@ -48,6 +48,7 @@ func Backend() {
 	jsonjwtr.GET("/coin", h.Coin)
 	jsonjwtr.GET("/gptutil", h.GptUtil)
 	jsonjwtr.GET("/playerdata", h.PlayerData)
+	jsonjwtr.GET("/getsms", h.RateLimit(60), h.SMS)
 	jsonjwtr.GET("/change/username", h.ChangeUsername)
 	jsonjwtr.GET("/change/gamename", h.ChangeGamename)
 	jsonjwtr.POST("/change/password", h.ChangePwd)

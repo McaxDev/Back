@@ -1,26 +1,26 @@
 package config
 
 type ConfigTemplate struct {
-	RconPwd       string
-	GptToken      string
-	JwtKey        string
-	McFont        string
-	Sql           string
-	ServerIP      string
-	BackPort      string
-	TcpPort       string
-	AvatarPath    string
-	ProxyAddr     string
-	ServerPort    map[string]int
-	RconPort      map[string]int
-	ServerPath    map[string]string
-	AsstID        map[string]string
-	SMTPConfig    map[string]string
-	SSL           map[string]string
-	MySQL         map[string]string
-	Redis         map[string]string
-	RedisMap      map[string]string
-	ImmediateExit bool
+	RconPwd    string
+	GptToken   string
+	JwtKey     string
+	McFont     string
+	Sql        string
+	ServerIP   string
+	BackPort   string
+	TcpPort    string
+	AvatarPath string
+	ProxyAddr  string
+	ServerPort map[string]int
+	RconPort   map[string]int
+	ServerPath map[string]string
+	AsstID     map[string]string
+	SMTPConfig map[string]string
+	SSL        map[string]string
+	MySQL      map[string]string
+	Redis      map[string]string
+	RedisMap   map[string]string
+	SMS        map[string]string
 }
 
 var Config = ConfigTemplate{
@@ -71,7 +71,10 @@ var Config = ConfigTemplate{
 		"host":     "localhost",
 		"DB":       "0",
 	},
-	ImmediateExit: true,
+	SMS: map[string]string{
+		"ID":     "",
+		"Secret": "",
+	},
 }
 
 type SrvInfoTemplate struct {

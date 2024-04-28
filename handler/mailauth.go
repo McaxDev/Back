@@ -2,10 +2,8 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"net/smtp"
-	"sync"
 	"time"
 
 	"github.com/McaxDev/Back/assets"
@@ -16,8 +14,6 @@ import (
 
 // 记录已发送的邮箱的map
 var Mailsent = make(map[string]MailStruct)
-var IpTimeMap = make(map[string]time.Time)
-var mu sync.Mutex
 var tmpl *template.Template
 
 // 定义上面map的值的结构体，接受者和过期时间
@@ -30,18 +26,6 @@ func Mailauth(c *gin.Context) {
 
 	//从查询字符串参数获得用户邮箱
 	receiver := c.Query("receiver")
-
-	//检查同一个IP是否在一分钟内重复请求
-	clientip := c.ClientIP()
-	mu.Lock()
-	if time.Now().Before(IpTimeMap[clientip]) {
-		lefttime := IpTimeMap[clientip].Sub(time.Now()).Seconds()
-		mu.Unlock()
-		util.Error(c, 400, fmt.Sprintf("请求频繁，请%.0f秒后重试", lefttime), nil)
-		return
-	}
-	IpTimeMap[clientip] = time.Now().Add(time.Minute)
-	mu.Unlock()
 
 	//检查用户输入的邮箱是否已经被注册
 	if err := co.DB.First(&co.User{}, "email = ?", receiver).Error; err == nil {
@@ -134,14 +118,4 @@ func AuthMail(authcode, receiver string) bool {
 	}
 	delete(Mailsent, authcode)
 	return true
-}
-
-// 清理过期的已发送邮件
-func ClearExpiredMailsent() {
-	now := time.Now()
-	for key, mail := range Mailsent {
-		if now.After(mail.Expiry) {
-			delete(Mailsent, key)
-		}
-	}
 }

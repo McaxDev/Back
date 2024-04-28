@@ -7,7 +7,9 @@ import (
 
 // 向客户端发送错误
 func Error(c *gin.Context, status int, msg string, err error) {
-	c.Set("error", err)
+	if err != nil {
+		c.Set("error", err)
+	}
 	c.AbortWithStatusJSON(status, Resp(msg, nil))
 }
 

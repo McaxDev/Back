@@ -59,7 +59,7 @@ func Cron() {
 	if _, err := c.AddFunc("0 */10 * * * *", func() {
 
 		// 清理内存
-		ut.ClearExpDefault(h.Challenges, h.IpTimeMap)
+		ut.ClearExpDefault(h.Challenges)
 		ut.ClearExpired(func(s h.MailStruct) time.Time { return s.Expiry }, h.Mailsent)
 
 	}); err != nil {

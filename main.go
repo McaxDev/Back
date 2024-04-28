@@ -8,11 +8,6 @@ import (
 
 func main() {
 
-	// 在程序结束时是否立即退出
-	if co.Config.ImmediateExit == false {
-		defer co.WaitOnExit()
-	}
-
 	// 初始化配置文件，自动迁移数据库表
 	co.ConfigInit()
 
